@@ -7,8 +7,9 @@
   "license": "MIT",
   "main": "build/server.js",
   "scripts": {
-    "start": "node build/server.js",
-    "build": "tsc",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "echo 'todo' && exit 1"
   },
@@ -17,8 +18,14 @@
       "pre-commit": "yarn lint && yarn test"
     }
   },
+  "dependencies": {
+    "next": "^9.3.5",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
   "devDependencies": {
     "@types/node": "^13.13.1",
+    "@types/react": "^16.9.34",
     "@typescript-eslint/eslint-plugin": "^2.29.0",
     "@typescript-eslint/parser": "^2.29.0",
     "eslint": "^6.8.0",
