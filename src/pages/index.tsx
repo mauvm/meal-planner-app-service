@@ -1,13 +1,22 @@
+import Head from 'next/head'
 import ShoppingList from '../components/ShoppingList'
 import { fetchUnfinishedItems } from './api/fetch-unfinished-items'
-
-// @todo Add head
-// @todo Add meta robots noindex
-// @todo Add no caching
 
 function IndexPage({ items }) {
   return (
     <>
+      <Head>
+        <meta charSet="UTF-8" />
+        <title>Boodschappenlijstje</title>
+        <meta name="robots" content="noimageindex, nofollow, nosnippet" />
+        <meta http-equiv="cache-control" content="max-age=0" />
+        <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="expires" content="0" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1"
+        ></meta>
+      </Head>
       <h1>Boodschappenlijstje</h1>
       <ShoppingList initialItems={items} />
     </>
