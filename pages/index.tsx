@@ -18,18 +18,20 @@ type Props = {
 }
 
 type State = {
+  items: Item[]
   newItemTitle: string
   creatingItem: boolean
-  createdItems: Item[]
+  finishingItems: string[]
 }
 
 class IndexPage extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
+      items: props.items,
       newItemTitle: '',
       creatingItem: false,
-      createdItems: [],
+      finishingItems: [],
     }
   }
 
@@ -48,20 +50,43 @@ class IndexPage extends Component<Props, State> {
       this.setState({ creatingItem: true })
 
       try {
-        const response = await axios.post('/api/create-item', {
+        await axios.post('/api/create-item', {
           body: { title: this.state.newItemTitle },
         })
-        this.setState({
-          createdItems: [response.data].concat(this.state.createdItems),
-        })
+        await this.refreshItems()
       } finally {
         this.setState({ creatingItem: false })
       }
     }
   }
 
+  @autobind
+  async handleFinish(event: React.ChangeEvent<HTMLInputElement>) {
+    const uuid = event.target.value
+    this.setState({ finishingItems: this.state.finishingItems.concat([uuid]) })
+
+    try {
+      await axios.post('/api/finish-item', {
+        body: { uuid },
+      })
+      await this.refreshItems()
+    } finally {
+      this.setState({
+        finishingItems: this.state.finishingItems.filter(
+          (uuidToFinish) => uuidToFinish !== uuid,
+        ),
+      })
+    }
+  }
+
+  async refreshItems() {
+    const response = await axios.get('/api/fetch-unfinished-items')
+    const items = response.data.data
+    this.setState({ items })
+  }
+
   render() {
-    const items = this.props.items
+    const items = this.state.items
 
     return (
       <>
@@ -75,12 +100,24 @@ class IndexPage extends Component<Props, State> {
           autoComplete="on"
         />
         <ul>
-          {this.state.createdItems.map((item) => (
-            <li key={item.uuid}>{item.title}</li>
-          ))}
-          {items.map((item) => (
-            <li key={item.uuid}>{item.title}</li>
-          ))}
+          {items.length > 0 ? (
+            items.map((item) => (
+              <li key={item.uuid}>
+                <label>
+                  <input
+                    type="checkbox"
+                    value={item.uuid}
+                    onChange={this.handleFinish}
+                    checked={this.state.finishingItems.includes(item.uuid)}
+                    disabled={this.state.finishingItems.includes(item.uuid)}
+                  />
+                  {item.title}
+                </label>
+              </li>
+            ))
+          ) : (
+            <li>Het lijstje is leeg</li>
+          )}
         </ul>
       </>
     )
