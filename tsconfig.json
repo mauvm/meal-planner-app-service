@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["es2020"],
-    "module": "commonjs",
+    "lib": [
+      "es2020"
+    ],
+    "module": "esnext",
     "target": "es2019",
-
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -15,6 +16,12 @@
     "isolatedModules": true,
     "jsx": "preserve"
   },
-  "exclude": ["node_modules"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }
