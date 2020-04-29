@@ -2,9 +2,11 @@ import axios from 'axios'
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
+import { fetchUnfinishedItems } from './api/fetch-unfinished-items'
 
 // @todo Add head
 // @todo Add meta robots noindex
+// @todo Add no caching
 
 type Item = {
   uuid: string
@@ -53,6 +55,7 @@ class IndexPage extends Component<Props, State> {
         await axios.post('/api/create-item', {
           body: { title: this.state.newItemTitle },
         })
+        this.setState({ newItemTitle: '' })
         await this.refreshItems()
       } finally {
         this.setState({ creatingItem: false })
@@ -81,7 +84,7 @@ class IndexPage extends Component<Props, State> {
 
   async refreshItems() {
     const response = await axios.get('/api/fetch-unfinished-items')
-    const items = response.data.data
+    const items = response.data
     this.setState({ items })
   }
 
@@ -125,16 +128,7 @@ class IndexPage extends Component<Props, State> {
 }
 
 export async function getServerSideProps() {
-  const response = await axios.get(
-    'http://localhost:3000/v1/shopping-lists/unfinished-items',
-    {
-      headers: {
-        Accept: 'application/json',
-      },
-    },
-  )
-  const items = response?.data?.data || []
-
+  const items = await fetchUnfinishedItems()
   return { props: { items } }
 }
 
