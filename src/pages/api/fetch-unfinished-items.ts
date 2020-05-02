@@ -1,10 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios'
 import HttpStatus from 'http-status-codes'
+import { getHost } from '../../util/shoppingListService'
 
 export async function fetchUnfinishedItems(): Promise<any[]> {
   const response = await axios.get(
-    'http://localhost:3000/v1/shopping-lists/unfinished-items',
+    `${getHost()}/v1/shopping-lists/unfinished-items`,
   )
   return response.data.data
 }
