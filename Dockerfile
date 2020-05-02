@@ -8,10 +8,15 @@ FROM node:12-alpine
 WORKDIR /data
 COPY . /data
 
+# @see https://nextjs.org/telemetry
+ENV NEXT_TELEMETRY_DISABLED=1
+
 RUN yarn install \
   && yarn build \
   # Clean up source code
-  && rm -r /data/pages/
+  && rm -r /data/src/ \
+  # Clean up dependencies
+  && yarn install --production --ignore-scripts --prefer-offline
 
 EXPOSE 3000
 CMD yarn start
