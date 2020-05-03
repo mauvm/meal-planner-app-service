@@ -4,7 +4,7 @@ import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
 
 type Item = {
-  uuid: string
+  id: string
   title: string
   createdAt: string
   finishedAt?: string
@@ -60,18 +60,19 @@ class ShoppingList extends Component<Props, State> {
 
   @autobind
   async handleFinish(event: React.ChangeEvent<HTMLInputElement>) {
-    const uuid = event.target.value
-    this.setState({ finishingItems: this.state.finishingItems.concat([uuid]) })
+    const id = event.target.value
+    this.setState({ finishingItems: this.state.finishingItems.concat([id]) })
 
     try {
+      // @todo Change to ID in URL
       await axios.post('/api/finish-item', {
-        body: { uuid },
+        body: { id },
       })
       await this.refreshItems()
     } finally {
       this.setState({
         finishingItems: this.state.finishingItems.filter(
-          (uuidToFinish) => uuidToFinish !== uuid,
+          (idToFinish) => idToFinish !== id,
         ),
       })
     }
@@ -99,14 +100,14 @@ class ShoppingList extends Component<Props, State> {
         <ul>
           {items.length > 0 ? (
             items.map((item) => (
-              <li key={item.uuid}>
+              <li key={item.id}>
                 <label>
                   <input
                     type="checkbox"
-                    value={item.uuid}
+                    value={item.id}
                     onChange={this.handleFinish}
-                    checked={this.state.finishingItems.includes(item.uuid)}
-                    disabled={this.state.finishingItems.includes(item.uuid)}
+                    checked={this.state.finishingItems.includes(item.id)}
+                    disabled={this.state.finishingItems.includes(item.id)}
                   />
                   {item.title}
                 </label>
