@@ -19,6 +19,7 @@ README.md
 /build/
 
 # Misc
+/.git/
 .DS_Store
 
 # Debug
