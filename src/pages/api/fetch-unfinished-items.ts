@@ -15,6 +15,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const items = await fetchUnfinishedItems()
     res.status(HttpStatus.OK).json(items)
   } catch (err) {
+    console.log('Error while fetching finished items', err) // @todo Replace with logger service
     res.status(HttpStatus.BAD_REQUEST).json({ message: err.message })
   }
 }
