@@ -5,8 +5,8 @@
 #   check and reset permissions for sensitive # files and directories.
 FROM node:12-alpine
 
-WORKDIR /data
-COPY . /data
+WORKDIR /app
+COPY . /app
 
 # @see https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -14,9 +14,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN yarn install \
   && yarn build \
   # Clean up source code
-  && rm -r /data/src/ \
+  && rm -r /app/src/ \
   # Clean up dependencies
   && yarn install --production --ignore-scripts --prefer-offline
+
+ENV NODE_ENV=production
 
 EXPOSE 3000
 CMD yarn start
