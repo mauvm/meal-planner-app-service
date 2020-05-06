@@ -18,6 +18,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     )
     res.status(HttpStatus.OK).json({})
   } catch (err) {
-    res.status(HttpStatus.BAD_REQUEST).end({ message: err.message })
+    res.status(HttpStatus.BAD_REQUEST).json({ message: err.message })
   }
 }

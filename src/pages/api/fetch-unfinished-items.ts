@@ -15,6 +15,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const items = await fetchUnfinishedItems()
     res.status(HttpStatus.OK).json(items)
   } catch (err) {
-    res.status(HttpStatus.BAD_REQUEST).end({ message: err.message })
+    res.status(HttpStatus.BAD_REQUEST).json({ message: err.message })
   }
 }
