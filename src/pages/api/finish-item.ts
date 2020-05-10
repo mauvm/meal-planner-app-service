@@ -10,7 +10,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     await axios.post(`${getHost()}/v1/shopping-lists/items/${id}/finish`)
     res.status(HttpStatus.OK).json({})
   } catch (err) {
-    console.log('Error while finishing item', err) // @todo Replace with logger service
+    // @todo Replace with logger service
+    console.log('Error while finishing item', err)
+
     res.status(HttpStatus.BAD_REQUEST).json({ message: err.message })
   }
 }

@@ -23,7 +23,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const id = response.headers['x-resource-id']
     res.status(HttpStatus.OK).json({ id })
   } catch (err) {
-    console.log('Error while creating item', err) // @todo Replace with logger service
+    // @todo Replace with logger service
+    console.log('Error while creating item', err)
+
     res.status(HttpStatus.BAD_REQUEST).json({ message: err.message })
   }
 }
