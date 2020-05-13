@@ -7,7 +7,7 @@
   "license": "MIT",
   "main": "build/server.js",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 8080",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
