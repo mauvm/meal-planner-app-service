@@ -2,6 +2,9 @@ import axios from 'axios'
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
+import { List, Checkbox, Input, Divider } from 'antd'
+import { CheckboxChangeEvent } from 'antd/lib/checkbox'
+import { PlusCircleOutlined, LoadingOutlined } from '@ant-design/icons'
 
 type Item = {
   id: string
@@ -59,7 +62,7 @@ class ShoppingList extends Component<Props, State> {
   }
 
   @autobind
-  async handleFinish(event: React.ChangeEvent<HTMLInputElement>) {
+  async handleFinish(event: CheckboxChangeEvent) {
     const id = event.target.value
     this.setState({ finishingItems: this.state.finishingItems.concat([id]) })
 
@@ -84,39 +87,53 @@ class ShoppingList extends Component<Props, State> {
     this.setState({ items })
   }
 
+  renderAddForm() {
+    return (
+      <Input
+        value={this.state.newItemTitle}
+        disabled={this.state.creatingItem}
+        prefix={
+          this.state.creatingItem ? <LoadingOutlined /> : <PlusCircleOutlined />
+        }
+        placeholder="Voeg product toe.."
+        autoComplete="on"
+        onChange={this.handleChange}
+        onKeyUp={this.handleKeyUp}
+      />
+    )
+  }
+
+  @autobind
+  renderItem(item: Item) {
+    const finishingItems = this.state.finishingItems
+
+    return (
+      <List.Item key={item.id}>
+        <Checkbox
+          value={item.id}
+          checked={finishingItems.includes(item.id)}
+          disabled={finishingItems.includes(item.id)}
+          onChange={this.handleFinish}
+        >
+          {item.title}
+        </Checkbox>
+      </List.Item>
+    )
+  }
+
   render() {
     const items = this.state.items
 
     return (
       <>
-        <input
-          type="text"
-          value={this.state.newItemTitle}
-          disabled={this.state.creatingItem}
-          onChange={this.handleChange}
-          onKeyUp={this.handleKeyUp}
-          autoComplete="on"
+        <Divider orientation="left">Boodschappen</Divider>
+        <List
+          size="small"
+          header={this.renderAddForm()}
+          bordered
+          dataSource={items}
+          renderItem={this.renderItem}
         />
-        <ul>
-          {items.length > 0 ? (
-            items.map((item) => (
-              <li key={item.id}>
-                <label>
-                  <input
-                    type="checkbox"
-                    value={item.id}
-                    onChange={this.handleFinish}
-                    checked={this.state.finishingItems.includes(item.id)}
-                    disabled={this.state.finishingItems.includes(item.id)}
-                  />
-                  {item.title}
-                </label>
-              </li>
-            ))
-          ) : (
-            <li>Het lijstje is leeg</li>
-          )}
-        </ul>
       </>
     )
   }
