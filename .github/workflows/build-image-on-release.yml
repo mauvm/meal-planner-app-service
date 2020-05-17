@@ -1,9 +1,10 @@
 name: Build Docker image for TransIP VPS on new version tag
 
-on:
-  push:
-    tags:
-      - '*.*.*'
+on: push
+# on:
+#   push:
+#     tags:
+#       - '*.*.*'
 
 jobs:
   # lint-and-test:
