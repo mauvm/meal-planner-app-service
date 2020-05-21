@@ -17,6 +17,7 @@ export type ItemLabel = string
 
 type Props = {
   item: Item
+  existingLabels: ItemLabel[]
   isUpdating?: boolean
   onFinish: (item: Item) => Promise<void>
   onLabelsChange: (item: Item, labels: ItemLabel[]) => Promise<void>
@@ -31,6 +32,16 @@ export default class ShoppingListItem extends Component<Props, State> {
 
   getLabels(): ItemLabel[] {
     return (this.props.item.labels || []).sort()
+  }
+
+  getAllLabels(): ItemLabel[] {
+    const labels = this.getLabels()
+    const existingLabels = this.props.existingLabels
+
+    return labels
+      .concat(existingLabels)
+      .sort()
+      .filter((value, index, self) => self.indexOf(value) === index) // Unique
   }
 
   @autobind
@@ -103,7 +114,7 @@ export default class ShoppingListItem extends Component<Props, State> {
             bordered={false}
             style={{ width: '40%' }}
           >
-            {labels.map((label) => (
+            {this.getAllLabels().map((label) => (
               <Option key={label} value={label}>
                 {label}
               </Option>

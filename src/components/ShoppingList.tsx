@@ -9,10 +9,12 @@ import { Item, ItemLabel } from './ShoppingListItem'
 
 type Props = {
   initialItems: Item[]
+  initialItemsLabels: ItemLabel[]
 }
 
 type State = {
   items: Item[]
+  labels: ItemLabel[]
   newItemTitle: string
   creatingItem: boolean
   updatingItems: string[]
@@ -23,6 +25,7 @@ export default class ShoppingList extends Component<Props, State> {
     super(props)
     this.state = {
       items: props.initialItems,
+      labels: props.initialItemsLabels,
       newItemTitle: '',
       creatingItem: false,
       updatingItems: [],
@@ -90,6 +93,7 @@ export default class ShoppingList extends Component<Props, State> {
         body: { id: item.id, labels },
       })
       await this.refreshItems()
+      await this.refreshItemsLabels()
     } catch (err) {
       // @todo Show notification
       console.error('Failed to update item labels', item, labels, err)
@@ -98,14 +102,18 @@ export default class ShoppingList extends Component<Props, State> {
         updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
       })
     }
-    // item.labels = labels
-    // this.setState({ items: this.state.items })
   }
 
   async refreshItems() {
-    const response = await axios.get('/api/fetch-unfinished-items')
+    const response = await axios.get('/api/list-unfinished-items')
     const items = response.data
     this.setState({ items })
+  }
+
+  async refreshItemsLabels() {
+    const response = await axios.get('/api/list-items-labels')
+    const labels = response.data
+    this.setState({ labels })
   }
 
   renderAddForm() {
@@ -127,10 +135,12 @@ export default class ShoppingList extends Component<Props, State> {
   @autobind
   renderItem(item: Item) {
     const updatingItems = this.state.updatingItems
+    const labels = this.state.labels
 
     return (
       <ShoppingListItem
         item={item}
+        existingLabels={labels}
         isUpdating={updatingItems.includes(item.id)}
         onFinish={this.handleItemFinish}
         onLabelsChange={this.handleItemLabelsChange}
