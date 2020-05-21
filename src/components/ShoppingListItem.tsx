@@ -1,65 +1,132 @@
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
-import { List, Checkbox } from 'antd'
-import { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import { CheckOutlined, EditOutlined } from '@ant-design/icons'
-import { Item } from './ShoppingList'
+import { List, Checkbox, Select, Tag, ConfigProvider } from 'antd'
+import { CustomTagProps } from 'rc-select/lib/interface/generator'
+
+const { Option } = Select
+
+export type Item = {
+  id: string
+  title: string
+  createdAt: string
+  finishedAt?: string
+  labels?: ItemLabel[]
+}
+
+export type ItemLabel = string
 
 type Props = {
   item: Item
-  isFinishing?: boolean
+  isUpdating?: boolean
   onFinish: (item: Item) => Promise<void>
-  onLabelsChange: (item: Item) => Promise<void>
+  onLabelsChange: (item: Item, labels: ItemLabel[]) => Promise<void>
 }
 
-type State = {
-  isEditing: boolean
-}
+type State = {}
 
 export default class ShoppingListItem extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    this.state = {
-      isEditing: false,
-    }
+  }
+
+  getLabels(): ItemLabel[] {
+    return (this.props.item.labels || []).sort()
   }
 
   @autobind
-  handleFinish(event: CheckboxChangeEvent) {
+  handleFinish() {
     this.props.onFinish(this.props.item)
   }
 
   @autobind
-  handleEdit() {
-    this.setState({ isEditing: true })
+  handleLabelsChange(labels: string[]) {
+    const newLabels = labels.sort()
+    const labelsHaveChanged =
+      this.getLabels().join(',') !== newLabels.sort().join(',')
+
+    if (labelsHaveChanged) {
+      this.props.onLabelsChange(this.props.item, newLabels)
+    }
   }
 
-  @autobind
-  handleSave() {
-    this.setState({ isEditing: false })
+  getLabelColor(label: string): string {
+    const colors = [
+      'pink',
+      'red',
+      'yellow',
+      'orange',
+      'cyan',
+      'green',
+      'blue',
+      'purple',
+      'geekblue',
+      'magenta',
+      'volcano',
+      'gold',
+      'lime',
+    ]
+
+    // Deterministic colors
+    const index =
+      label
+        .toLowerCase()
+        .split('')
+        .reduce((total, char) => total + char.charCodeAt(0), 0) % colors.length
+
+    return colors[index]
   }
 
   render() {
     const item = this.props.item
-    const isFinishing = this.props.isFinishing
-    const isEditing = this.state.isEditing
+    const isUpdating = this.props.isUpdating
+    const labels = this.getLabels()
 
     return (
       <List.Item key={item.id}>
         <Checkbox
           value={item.id}
-          checked={isFinishing}
-          disabled={isFinishing}
+          checked={isUpdating}
+          disabled={isUpdating}
           onChange={this.handleFinish}
+          style={{ width: '50%' }}
         >
           {item.title}
         </Checkbox>
-        {isEditing ? (
-          <CheckOutlined onClick={this.handleSave} />
-        ) : (
-          <EditOutlined onClick={this.handleEdit} />
-        )}
+        <ConfigProvider renderEmpty={() => 'Geen items..'}>
+          <Select
+            mode="tags"
+            tagRender={this.renderTag}
+            value={labels}
+            disabled={isUpdating}
+            onChange={this.handleLabelsChange}
+            placeholder="Labels"
+            bordered={false}
+            style={{ width: '40%' }}
+          >
+            {labels.map((label) => (
+              <Option key={label} value={label}>
+                {label}
+              </Option>
+            ))}
+          </Select>
+        </ConfigProvider>
       </List.Item>
+    )
+  }
+
+  @autobind
+  renderTag(props: CustomTagProps) {
+    const { label, value, closable, onClose } = props
+
+    return (
+      <Tag
+        color={this.getLabelColor(String(value))}
+        closable={closable}
+        onClose={onClose}
+        style={{ marginRight: 3 }}
+      >
+        {label}
+      </Tag>
     )
   }
 }

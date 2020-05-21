@@ -2,16 +2,10 @@ import axios from 'axios'
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
-import { List, Input, Divider } from 'antd'
+import { List, Input, Divider, ConfigProvider, Empty } from 'antd'
 import { PlusCircleOutlined, LoadingOutlined } from '@ant-design/icons'
 import ShoppingListItem from './ShoppingListItem'
-
-export type Item = {
-  id: string
-  title: string
-  createdAt: string
-  finishedAt?: string
-}
+import { Item, ItemLabel } from './ShoppingListItem'
 
 type Props = {
   initialItems: Item[]
@@ -21,7 +15,7 @@ type State = {
   items: Item[]
   newItemTitle: string
   creatingItem: boolean
-  finishingItems: string[]
+  updatingItems: string[]
 }
 
 export default class ShoppingList extends Component<Props, State> {
@@ -31,7 +25,7 @@ export default class ShoppingList extends Component<Props, State> {
       items: props.initialItems,
       newItemTitle: '',
       creatingItem: false,
-      finishingItems: [],
+      updatingItems: [],
     }
   }
 
@@ -49,12 +43,17 @@ export default class ShoppingList extends Component<Props, State> {
 
       this.setState({ creatingItem: true })
 
+      const data = { title: this.state.newItemTitle }
+
       try {
         await axios.post('/api/create-item', {
-          body: { title: this.state.newItemTitle },
+          body: data,
         })
         this.setState({ newItemTitle: '' })
         await this.refreshItems()
+      } catch (err) {
+        // @todo Show notification
+        console.error('Failed to create item', data, err)
       } finally {
         this.setState({ creatingItem: false })
       }
@@ -64,7 +63,7 @@ export default class ShoppingList extends Component<Props, State> {
   @autobind
   async handleItemFinish(item: Item) {
     this.setState({
-      finishingItems: this.state.finishingItems.concat([item.id]),
+      updatingItems: this.state.updatingItems.concat([item.id]),
     })
 
     try {
@@ -73,18 +72,34 @@ export default class ShoppingList extends Component<Props, State> {
         body: { id: item.id },
       })
       await this.refreshItems()
+    } catch (err) {
+      // @todo Show notification
+      console.error('Failed to finish item', item, err)
     } finally {
       this.setState({
-        finishingItems: this.state.finishingItems.filter(
-          (idToFinish) => idToFinish !== item.id,
-        ),
+        updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
       })
     }
   }
 
   @autobind
-  async handleItemLabelsChange(item: Item) {
-    console.log(item)
+  async handleItemLabelsChange(item: Item, labels: ItemLabel[]) {
+    try {
+      // @todo Change to ID in URL
+      await axios.post('/api/set-item-labels', {
+        body: { id: item.id, labels },
+      })
+      await this.refreshItems()
+    } catch (err) {
+      // @todo Show notification
+      console.error('Failed to update item labels', item, labels, err)
+    } finally {
+      this.setState({
+        updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
+      })
+    }
+    // item.labels = labels
+    // this.setState({ items: this.state.items })
   }
 
   async refreshItems() {
@@ -111,12 +126,12 @@ export default class ShoppingList extends Component<Props, State> {
 
   @autobind
   renderItem(item: Item) {
-    const finishingItems = this.state.finishingItems
+    const updatingItems = this.state.updatingItems
 
     return (
       <ShoppingListItem
         item={item}
-        isFinishing={finishingItems.includes(item.id)}
+        isUpdating={updatingItems.includes(item.id)}
         onFinish={this.handleItemFinish}
         onLabelsChange={this.handleItemLabelsChange}
       />
@@ -129,13 +144,22 @@ export default class ShoppingList extends Component<Props, State> {
     return (
       <>
         <Divider orientation="left">Boodschappen</Divider>
-        <List
-          size="small"
-          header={this.renderAddForm()}
-          bordered
-          dataSource={items}
-          renderItem={this.renderItem}
-        />
+        <ConfigProvider
+          renderEmpty={() => (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Geen producten"
+            />
+          )}
+        >
+          <List
+            size="small"
+            header={this.renderAddForm()}
+            bordered
+            dataSource={items}
+            renderItem={this.renderItem}
+          />
+        </ConfigProvider>
       </>
     )
   }
