@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
-import { List, Input, Divider, ConfigProvider, Empty } from 'antd'
+import { List, Input, Divider, ConfigProvider, Empty, notification } from 'antd'
 import { PlusCircleOutlined, LoadingOutlined } from '@ant-design/icons'
 import ShoppingListItem from './ShoppingListItem'
 import { Item, ItemLabel } from './ShoppingListItem'
@@ -55,8 +55,13 @@ export default class ShoppingList extends Component<Props, State> {
         this.setState({ newItemTitle: '' })
         await this.refreshItems()
       } catch (err) {
-        // @todo Show notification
         console.error('Failed to create item', data, err)
+
+        notification.error({
+          message: 'Toevoegen mislukt!',
+          description: err.message,
+          placement: 'topRight',
+        })
       } finally {
         this.setState({ creatingItem: false })
       }
@@ -76,8 +81,13 @@ export default class ShoppingList extends Component<Props, State> {
       })
       await this.refreshItems()
     } catch (err) {
-      // @todo Show notification
       console.error('Failed to finish item', item, err)
+
+      notification.error({
+        message: 'Afronden mislukt!',
+        description: err.message,
+        placement: 'topRight',
+      })
     } finally {
       this.setState({
         updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
@@ -95,8 +105,13 @@ export default class ShoppingList extends Component<Props, State> {
       await this.refreshItems()
       await this.refreshItemsLabels()
     } catch (err) {
-      // @todo Show notification
       console.error('Failed to update item labels', item, labels, err)
+
+      notification.error({
+        message: 'Labels bijwerken mislukt!',
+        description: err.message,
+        placement: 'topRight',
+      })
     } finally {
       this.setState({
         updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
