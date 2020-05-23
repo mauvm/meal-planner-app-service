@@ -12,7 +12,7 @@ yarn dev
 ## Deploy
 
 ```bash
-yarn version # For current version and version bumping
-docker build -t app-service:$VERSION .
+minikube docker-env | Invoke-Expression # On Windows
+docker build -t app-service .
 # Deploy via infrastructure/
 ```
