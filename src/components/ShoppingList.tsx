@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
@@ -6,6 +5,11 @@ import { List, Input, Divider, ConfigProvider, Empty, notification } from 'antd'
 import { PlusCircleOutlined, LoadingOutlined } from '@ant-design/icons'
 import ShoppingListItem from './ShoppingListItem'
 import { Item, ItemLabel } from './ShoppingListItem'
+import createItem from '../api/shoppingLists/createItem'
+import finishItem from '../api/shoppingLists/finishItem'
+import setItemLabels from '../api/shoppingLists/setItemLabels'
+import listUnfinishedItems from '../api/shoppingLists/listUnfinishedItems'
+import listItemsLabels from '../api/shoppingLists/listItemsLabels'
 
 type Props = {
   initialItems: Item[]
@@ -49,11 +53,8 @@ export default class ShoppingList extends Component<Props, State> {
       const data = { title: this.state.newItemTitle }
 
       try {
-        await axios.post('/api/create-item', {
-          body: data,
-        })
+        await createItem(data)
         this.setState({ newItemTitle: '' })
-        await this.refreshItems()
       } catch (err) {
         console.error('Failed to create item', data, err)
 
@@ -63,6 +64,7 @@ export default class ShoppingList extends Component<Props, State> {
           placement: 'topRight',
         })
       } finally {
+        await this.refreshItems()
         this.setState({ creatingItem: false })
       }
     }
@@ -75,11 +77,7 @@ export default class ShoppingList extends Component<Props, State> {
     })
 
     try {
-      // @todo Change to ID in URL
-      await axios.post('/api/finish-item', {
-        body: { id: item.id },
-      })
-      await this.refreshItems()
+      await finishItem(item.id)
     } catch (err) {
       console.error('Failed to finish item', item, err)
 
@@ -89,6 +87,7 @@ export default class ShoppingList extends Component<Props, State> {
         placement: 'topRight',
       })
     } finally {
+      await this.refreshItems()
       this.setState({
         updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
       })
@@ -98,12 +97,7 @@ export default class ShoppingList extends Component<Props, State> {
   @autobind
   async handleItemLabelsChange(item: Item, labels: ItemLabel[]) {
     try {
-      // @todo Change to ID in URL
-      await axios.post('/api/set-item-labels', {
-        body: { id: item.id, labels },
-      })
-      await this.refreshItems()
-      await this.refreshItemsLabels()
+      await setItemLabels(item.id, labels)
     } catch (err) {
       console.error('Failed to update item labels', item, labels, err)
 
@@ -113,6 +107,8 @@ export default class ShoppingList extends Component<Props, State> {
         placement: 'topRight',
       })
     } finally {
+      await this.refreshItems()
+      await this.refreshItemsLabels()
       this.setState({
         updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
       })
@@ -120,14 +116,12 @@ export default class ShoppingList extends Component<Props, State> {
   }
 
   async refreshItems() {
-    const response = await axios.get('/api/list-unfinished-items')
-    const items = response.data
+    const items = await listUnfinishedItems()
     this.setState({ items })
   }
 
   async refreshItemsLabels() {
-    const response = await axios.get('/api/list-items-labels')
-    const labels = response.data
+    const labels = await listItemsLabels()
     this.setState({ labels })
   }
 

@@ -1,7 +1,7 @@
-import { listUnfinishedItems } from './api/list-unfinished-items'
-import { listItemsLabels } from './api/list-items-labels'
 import ShoppingList from '../components/ShoppingList'
 import MainLayout from '../components/MainLayout'
+import listUnfinishedItems from '../api/shoppingLists/listUnfinishedItems'
+import listItemsLabels from '../api/shoppingLists/listItemsLabels'
 
 function IndexPage({ items, itemsLabels }) {
   return (
