@@ -15,6 +15,7 @@ import listItemsLabels from '../api/shoppingLists/listItemsLabels'
 type Props = {}
 
 type State = {
+  isLoading: boolean
   items: Item[]
   labels: ItemLabel[]
   newItemTitle: string
@@ -26,6 +27,7 @@ export default class ShoppingList extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
+      isLoading: true,
       items: [],
       labels: [],
       newItemTitle: '',
@@ -37,6 +39,7 @@ export default class ShoppingList extends Component<Props, State> {
   async componentDidMount() {
     await this.refreshItems()
     await this.refreshItemsLabels()
+    this.setState({ isLoading: false })
   }
 
   async refreshItems() {
@@ -158,10 +161,12 @@ export default class ShoppingList extends Component<Props, State> {
   }
 
   renderNewItemForm() {
+    const isLoading = this.state.isLoading
+
     return (
       <Input
         value={this.state.newItemTitle}
-        disabled={this.state.creatingItem}
+        disabled={isLoading || this.state.creatingItem}
         prefix={
           this.state.creatingItem ? <LoadingOutlined /> : <PlusCircleOutlined />
         }
@@ -191,6 +196,7 @@ export default class ShoppingList extends Component<Props, State> {
   }
 
   render() {
+    const isLoading = this.state.isLoading
     const items = this.state.items
 
     return (
@@ -200,7 +206,7 @@ export default class ShoppingList extends Component<Props, State> {
           renderEmpty={() => (
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Geen producten"
+              description={isLoading ? 'Laden..' : 'Geen producten'}
             />
           )}
         >
