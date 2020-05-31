@@ -19,7 +19,7 @@ type State = {
   items: Item[]
   labels: ItemLabel[]
   newItemTitle: string
-  creatingItem: boolean
+  isCreatingItem: boolean
   updatingItems: string[]
 }
 
@@ -31,7 +31,7 @@ export default class ShoppingList extends Component<Props, State> {
       items: [],
       labels: [],
       newItemTitle: '',
-      creatingItem: false,
+      isCreatingItem: false,
       updatingItems: [],
     }
   }
@@ -113,7 +113,7 @@ export default class ShoppingList extends Component<Props, State> {
         return
       }
 
-      this.setState({ creatingItem: true })
+      this.setState({ isCreatingItem: true })
 
       const data = { title: this.state.newItemTitle }
 
@@ -125,7 +125,7 @@ export default class ShoppingList extends Component<Props, State> {
         this.notifyError('Toevoegen mislukt!', err)
       } finally {
         await this.refreshItems()
-        this.setState({ creatingItem: false })
+        this.setState({ isCreatingItem: false })
       }
     }
   }
@@ -218,9 +218,13 @@ export default class ShoppingList extends Component<Props, State> {
     return (
       <Input
         value={this.state.newItemTitle}
-        disabled={isLoading || this.state.creatingItem}
+        disabled={isLoading || this.state.isCreatingItem}
         prefix={
-          this.state.creatingItem ? <LoadingOutlined /> : <PlusCircleOutlined />
+          this.state.isCreatingItem ? (
+            <LoadingOutlined />
+          ) : (
+            <PlusCircleOutlined />
+          )
         }
         placeholder="Voeg product toe.."
         autoComplete="on"
