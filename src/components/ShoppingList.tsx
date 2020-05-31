@@ -90,6 +90,7 @@ export default class ShoppingList extends Component<Props, State> {
           await finishItem(item.id)
         } catch (err) {
           console.error('Failed to finish item', item, err)
+          throw err
         }
       },
       { failedMessage: 'Afronden mislukt!' },
@@ -105,6 +106,7 @@ export default class ShoppingList extends Component<Props, State> {
           await setItemTitle(item.id, title)
         } catch (err) {
           console.error('Failed to set item title', item, title, err)
+          throw err
         }
       },
       { failedMessage: 'Omschrijving bijwerken mislukt!' },
@@ -120,6 +122,7 @@ export default class ShoppingList extends Component<Props, State> {
           await setItemLabels(item.id, labels)
         } catch (err) {
           console.error('Failed to update item labels', item, labels, err)
+          throw err
         } finally {
           await this.refreshItemsLabels()
         }
