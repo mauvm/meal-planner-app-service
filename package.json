@@ -7,9 +7,9 @@
   "license": "MIT",
   "main": "build/server.js",
   "scripts": {
-    "dev": "next dev --port 8080",
+    "dev": "next dev --port=8080",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port=3000",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "echo 'todo' && exit 1"
   },
