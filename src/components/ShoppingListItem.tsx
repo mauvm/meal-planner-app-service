@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
-import { List, Checkbox, Select, Tag, ConfigProvider } from 'antd'
+import { List, Checkbox, Input, Select, Tag, ConfigProvider } from 'antd'
 import { CustomTagProps } from 'rc-select/lib/interface/generator'
 
 const { Option } = Select
@@ -94,33 +94,55 @@ export default class ShoppingListItem extends Component<Props, State> {
 
     return (
       <List.Item key={item.id}>
-        <Checkbox
-          value={item.id}
-          checked={isUpdating}
-          disabled={isUpdating}
-          onChange={this.handleFinish}
-          style={{ width: '50%' }}
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+          }}
         >
-          {item.title}
-        </Checkbox>
-        <ConfigProvider direction="rtl" renderEmpty={() => 'Geen items..'}>
-          <Select
-            mode="tags"
-            tagRender={this.renderTag}
-            value={labels}
-            disabled={isUpdating}
-            onChange={this.handleLabelsChange}
-            placeholder="Labels"
-            bordered={false}
-            style={{ minWidth: '12em' }}
-          >
-            {this.getAllLabels().map((label) => (
-              <Option key={label} value={label}>
-                {label}
-              </Option>
-            ))}
-          </Select>
-        </ConfigProvider>
+          <div style={{ width: '2em', flex: '0 1 auto' }}>
+            <Checkbox
+              value={item.id}
+              checked={isUpdating}
+              disabled={isUpdating}
+              onChange={this.handleFinish}
+              // Increase clickable area
+              style={{
+                position: 'relative',
+                margin: '-0.7em',
+                padding: '0.7em',
+              }}
+            />
+          </div>
+          <div style={{ flex: '1 1 auto' }}>
+            <Input
+              value={item.title}
+              disabled={isUpdating}
+              style={{ border: 'none', boxShadow: 'none' }}
+            />
+          </div>
+          <div style={{ flex: '0 1 auto' }}>
+            <ConfigProvider direction="rtl" renderEmpty={() => 'Geen items..'}>
+              <Select
+                mode="tags"
+                tagRender={this.renderTag}
+                value={labels}
+                disabled={isUpdating}
+                onChange={this.handleLabelsChange}
+                placeholder="Labels"
+                bordered={false}
+                style={{ minWidth: '12em' }}
+              >
+                {this.getAllLabels().map((label) => (
+                  <Option key={label} value={label}>
+                    {label}
+                  </Option>
+                ))}
+              </Select>
+            </ConfigProvider>
+          </div>
+        </div>
       </List.Item>
     )
   }
