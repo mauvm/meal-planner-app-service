@@ -237,6 +237,7 @@ export default class ShoppingList extends Component<Props, State> {
 
     return (
       <ShoppingListItem
+        key={item.id}
         item={item}
         existingLabels={labels}
         isUpdating={updatingItems.includes(item.id)}
