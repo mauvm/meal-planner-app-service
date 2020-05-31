@@ -254,7 +254,9 @@ export default class ShoppingList extends Component<Props, State> {
 
     return (
       <>
-        <Divider orientation="left">Boodschappen</Divider>
+        <Divider orientation="left">
+          Boodschappen{items.length > 0 ? <small> ({items.length})</small> : ''}
+        </Divider>
         <ConfigProvider
           renderEmpty={() => (
             <Empty
