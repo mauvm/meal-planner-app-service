@@ -103,7 +103,7 @@ export default class ShoppingListItem extends Component<Props, State> {
         >
           {item.title}
         </Checkbox>
-        <ConfigProvider renderEmpty={() => 'Geen items..'}>
+        <ConfigProvider direction="rtl" renderEmpty={() => 'Geen items..'}>
           <Select
             mode="tags"
             tagRender={this.renderTag}
@@ -112,7 +112,7 @@ export default class ShoppingListItem extends Component<Props, State> {
             onChange={this.handleLabelsChange}
             placeholder="Labels"
             bordered={false}
-            style={{ width: '40%' }}
+            style={{ minWidth: '12em' }}
           >
             {this.getAllLabels().map((label) => (
               <Option key={label} value={label}>
@@ -134,7 +134,6 @@ export default class ShoppingListItem extends Component<Props, State> {
         color={this.getLabelColor(String(value))}
         closable={closable}
         onClose={onClose}
-        style={{ marginRight: 3 }}
       >
         {label}
       </Tag>
