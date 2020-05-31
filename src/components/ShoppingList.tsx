@@ -11,10 +11,7 @@ import setItemLabels from '../api/shoppingLists/setItemLabels'
 import listUnfinishedItems from '../api/shoppingLists/listUnfinishedItems'
 import listItemsLabels from '../api/shoppingLists/listItemsLabels'
 
-type Props = {
-  initialItems: Item[]
-  initialItemsLabels: ItemLabel[]
-}
+type Props = {}
 
 type State = {
   items: Item[]
@@ -28,12 +25,17 @@ export default class ShoppingList extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      items: props.initialItems,
-      labels: props.initialItemsLabels,
+      items: [],
+      labels: [],
       newItemTitle: '',
       creatingItem: false,
       updatingItems: [],
     }
+  }
+
+  async componentDidMount() {
+    await this.refreshItems()
+    await this.refreshItemsLabels()
   }
 
   @autobind
