@@ -26,6 +26,7 @@
     "antd": "^4.2.2",
     "autobind-decorator": "^2.4.0",
     "axios": "^0.19.2",
+    "helpful-decorators": "^2.0.6",
     "http-status-codes": "^1.4.0",
     "next": "^9.3.5",
     "react": "^16.13.1",

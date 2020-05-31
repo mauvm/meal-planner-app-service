@@ -7,6 +7,7 @@ import ShoppingListItem from './ShoppingListItem'
 import { Item, ItemLabel } from './ShoppingListItem'
 import createItem from '../api/shoppingLists/createItem'
 import finishItem from '../api/shoppingLists/finishItem'
+import setItemTitle from '../api/shoppingLists/setItemTitle'
 import setItemLabels from '../api/shoppingLists/setItemLabels'
 import listUnfinishedItems from '../api/shoppingLists/listUnfinishedItems'
 import listItemsLabels from '../api/shoppingLists/listItemsLabels'
@@ -38,13 +39,23 @@ export default class ShoppingList extends Component<Props, State> {
     await this.refreshItemsLabels()
   }
 
+  async refreshItems() {
+    const items = await listUnfinishedItems()
+    this.setState({ items })
+  }
+
+  async refreshItemsLabels() {
+    const labels = await listItemsLabels()
+    this.setState({ labels })
+  }
+
   @autobind
-  handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  handleNewItemTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ newItemTitle: event.currentTarget.value })
   }
 
   @autobind
-  async handleKeyUp(event: React.KeyboardEvent<HTMLInputElement>) {
+  async handleNewItemTitleKeyUp(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.keyCode === Key.Enter) {
       if (!this.state.newItemTitle) {
         return
@@ -59,12 +70,7 @@ export default class ShoppingList extends Component<Props, State> {
         this.setState({ newItemTitle: '' })
       } catch (err) {
         console.error('Failed to create item', data, err)
-
-        notification.error({
-          message: 'Toevoegen mislukt!',
-          description: err.message,
-          placement: 'topRight',
-        })
+        this.notifyError('Toevoegen mislukt!', err)
       } finally {
         await this.refreshItems()
         this.setState({ creatingItem: false })
@@ -74,60 +80,84 @@ export default class ShoppingList extends Component<Props, State> {
 
   @autobind
   async handleItemFinish(item: Item) {
+    await this.updateItem(
+      item,
+      async () => {
+        try {
+          await finishItem(item.id)
+        } catch (err) {
+          console.error('Failed to finish item', item, err)
+        }
+      },
+      { failedMessage: 'Afronden mislukt!' },
+    )
+  }
+
+  @autobind
+  async handleItemTitleChange(item: Item, title: string) {
+    await this.updateItem(
+      item,
+      async () => {
+        try {
+          await setItemTitle(item.id, title)
+        } catch (err) {
+          console.error('Failed to set item title', item, title, err)
+        }
+      },
+      { failedMessage: 'Omschrijving bijwerken mislukt!' },
+    )
+  }
+
+  @autobind
+  async handleItemLabelsChange(item: Item, labels: ItemLabel[]) {
+    await this.updateItem(
+      item,
+      async () => {
+        try {
+          await setItemLabels(item.id, labels)
+        } catch (err) {
+          console.error('Failed to update item labels', item, labels, err)
+        } finally {
+          await this.refreshItemsLabels()
+        }
+      },
+      { failedMessage: 'Labels bijwerken mislukt!' },
+    )
+  }
+
+  async updateItem(
+    item: Item,
+    updateFunction: () => Promise<void>,
+    options: { failedMessage?: string } = {},
+  ) {
+    // Disable item
     this.setState({
       updatingItems: this.state.updatingItems.concat([item.id]),
     })
 
     try {
-      await finishItem(item.id)
+      await updateFunction()
     } catch (err) {
-      console.error('Failed to finish item', item, err)
-
-      notification.error({
-        message: 'Afronden mislukt!',
-        description: err.message,
-        placement: 'topRight',
-      })
+      this.notifyError(options.failedMessage || 'Aanpassing niet gelukt!', err)
     } finally {
       await this.refreshItems()
+
+      // Enable item
       this.setState({
         updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
       })
     }
   }
 
-  @autobind
-  async handleItemLabelsChange(item: Item, labels: ItemLabel[]) {
-    try {
-      await setItemLabels(item.id, labels)
-    } catch (err) {
-      console.error('Failed to update item labels', item, labels, err)
-
-      notification.error({
-        message: 'Labels bijwerken mislukt!',
-        description: err.message,
-        placement: 'topRight',
-      })
-    } finally {
-      await this.refreshItems()
-      await this.refreshItemsLabels()
-      this.setState({
-        updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
-      })
-    }
+  notifyError(message: string, err: Error) {
+    notification.error({
+      message,
+      description: err.message,
+      placement: 'topRight',
+    })
   }
 
-  async refreshItems() {
-    const items = await listUnfinishedItems()
-    this.setState({ items })
-  }
-
-  async refreshItemsLabels() {
-    const labels = await listItemsLabels()
-    this.setState({ labels })
-  }
-
-  renderAddForm() {
+  renderNewItemForm() {
     return (
       <Input
         value={this.state.newItemTitle}
@@ -137,8 +167,8 @@ export default class ShoppingList extends Component<Props, State> {
         }
         placeholder="Voeg product toe.."
         autoComplete="on"
-        onChange={this.handleChange}
-        onKeyUp={this.handleKeyUp}
+        onChange={this.handleNewItemTitleChange}
+        onKeyUp={this.handleNewItemTitleKeyUp}
       />
     )
   }
@@ -154,6 +184,7 @@ export default class ShoppingList extends Component<Props, State> {
         existingLabels={labels}
         isUpdating={updatingItems.includes(item.id)}
         onFinish={this.handleItemFinish}
+        onTitleChange={this.handleItemTitleChange}
         onLabelsChange={this.handleItemLabelsChange}
       />
     )
@@ -175,7 +206,7 @@ export default class ShoppingList extends Component<Props, State> {
         >
           <List
             size="small"
-            header={this.renderAddForm()}
+            header={this.renderNewItemForm()}
             bordered
             dataSource={items}
             renderItem={this.renderItem}

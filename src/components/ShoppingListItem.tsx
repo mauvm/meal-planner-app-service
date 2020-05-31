@@ -1,7 +1,8 @@
-import { Component } from 'react'
+import { Component, ChangeEvent } from 'react'
 import autobind from 'autobind-decorator'
 import { List, Checkbox, Input, Select, Tag, ConfigProvider } from 'antd'
 import { CustomTagProps } from 'rc-select/lib/interface/generator'
+import { debounce } from 'helpful-decorators'
 
 const { Option } = Select
 
@@ -20,14 +21,20 @@ type Props = {
   existingLabels: ItemLabel[]
   isUpdating?: boolean
   onFinish: (item: Item) => Promise<void>
+  onTitleChange: (item: Item, title: string) => Promise<void>
   onLabelsChange: (item: Item, labels: ItemLabel[]) => Promise<void>
 }
 
-type State = {}
+type State = {
+  title: string
+}
 
 export default class ShoppingListItem extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
+    this.state = {
+      title: props.item.title,
+    }
   }
 
   getLabels(): ItemLabel[] {
@@ -47,6 +54,18 @@ export default class ShoppingListItem extends Component<Props, State> {
   @autobind
   handleFinish() {
     this.props.onFinish(this.props.item)
+  }
+
+  @autobind
+  handleTitleChange(event: ChangeEvent<{ value: string }>) {
+    const title = event.target.value
+    this.setState({ title })
+    this.triggerTitleChange(title)
+  }
+
+  @debounce(1000)
+  triggerTitleChange(title: string) {
+    this.props.onTitleChange(this.props.item, title)
   }
 
   @autobind
@@ -90,6 +109,7 @@ export default class ShoppingListItem extends Component<Props, State> {
   render() {
     const item = this.props.item
     const isUpdating = this.props.isUpdating
+    const title = this.state.title
     const labels = this.getLabels()
 
     return (
@@ -117,8 +137,10 @@ export default class ShoppingListItem extends Component<Props, State> {
           </div>
           <div style={{ flex: '1 1 auto' }}>
             <Input
-              value={item.title}
+              value={title}
               disabled={isUpdating}
+              onChange={this.handleTitleChange}
+              placeholder="Geen omschrijving"
               style={{ border: 'none', boxShadow: 'none' }}
             />
           </div>
