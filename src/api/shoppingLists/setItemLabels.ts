@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { getHost } from './service'
-import { ItemLabel } from '../../components/ShoppingListItem'
+import { ItemLabel } from '../../util/types'
 
 export default async function setItemLabels(
   id: string,

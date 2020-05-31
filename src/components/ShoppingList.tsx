@@ -1,25 +1,46 @@
 import { Component } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
-import { List, Input, Divider, ConfigProvider, Empty, notification } from 'antd'
-import { PlusCircleOutlined, LoadingOutlined } from '@ant-design/icons'
+import {
+  List,
+  Select,
+  Divider,
+  Tag,
+  ConfigProvider,
+  Empty,
+  notification,
+  Spin,
+} from 'antd'
+import { debounce } from 'helpful-decorators'
 import ShoppingListItem from './ShoppingListItem'
-import { Item, ItemLabel } from './ShoppingListItem'
 import createItem from '../api/shoppingLists/createItem'
+import searchItems from '../api/shoppingLists/searchItems'
 import finishItem from '../api/shoppingLists/finishItem'
 import setItemTitle from '../api/shoppingLists/setItemTitle'
 import setItemLabels from '../api/shoppingLists/setItemLabels'
 import listUnfinishedItems from '../api/shoppingLists/listUnfinishedItems'
 import listItemsLabels from '../api/shoppingLists/listItemsLabels'
+import { Item, ItemLabel } from '../util/types'
+import getLabelColor from '../util/getLabelColor'
+import getItemLabels from '../util/getItemLabels'
+
+const { Option } = Select
 
 type Props = {}
 
 type State = {
   isLoading: boolean
+
   items: Item[]
   labels: ItemLabel[]
+
   newItemTitle: string
   isCreatingItem: boolean
+
+  isSearching: boolean
+  lastSearchQuery: string
+  searchResults: Item[]
+
   updatingItems: string[]
 }
 
@@ -28,10 +49,17 @@ export default class ShoppingList extends Component<Props, State> {
     super(props)
     this.state = {
       isLoading: true,
+
       items: [],
       labels: [],
+
       newItemTitle: '',
       isCreatingItem: false,
+
+      isSearching: false,
+      lastSearchQuery: '',
+      searchResults: [],
+
       updatingItems: [],
     }
   }
@@ -43,7 +71,7 @@ export default class ShoppingList extends Component<Props, State> {
   }
 
   async refreshItems() {
-    const items = (await listUnfinishedItems()) as Item[]
+    const items = await listUnfinishedItems()
     this.sortItems(items)
     this.setState({ items })
   }
@@ -76,7 +104,7 @@ export default class ShoppingList extends Component<Props, State> {
     ]
 
     function score(item: Item) {
-      const labels = item.labels || []
+      const labels = getItemLabels(item)
 
       // Find index of first known label
       let knownLabelIndex = knownLabels.findIndex((knownLabel: string) =>
@@ -102,31 +130,89 @@ export default class ShoppingList extends Component<Props, State> {
   }
 
   @autobind
-  handleNewItemTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ newItemTitle: event.currentTarget.value })
-  }
+  @debounce(500, { leading: false })
+  async handleNewItemSearch(query: string) {
+    if (!query) {
+      return
+    }
 
-  @autobind
-  async handleNewItemTitleKeyUp(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.keyCode === Key.Enter) {
-      if (!this.state.newItemTitle) {
+    this.setState({ isSearching: true, lastSearchQuery: query })
+
+    try {
+      const items = (await searchItems(query)) as Item[]
+
+      // Ignore results if query changed
+      if (query !== this.state.lastSearchQuery) {
         return
       }
 
-      this.setState({ isCreatingItem: true })
+      this.setState({ searchResults: items })
+    } catch (err) {
+      console.error('Failed to search for items', query, err)
+      this.notifyError(`Zoeken naar "${query}" mislukt!`, err)
+    } finally {
+      this.setState({ isSearching: false })
+    }
+  }
 
-      const data = { title: this.state.newItemTitle }
+  @autobind
+  async handleNewItemSelected(id: string) {
+    const item = this.state.searchResults.find((item) => item.id === id)
 
-      try {
-        await createItem(data)
-        this.setState({ newItemTitle: '' })
-      } catch (err) {
-        console.error('Failed to create item', data, err)
-        this.notifyError('Toevoegen mislukt!', err)
-      } finally {
+    if (!item) {
+      console.error(`Could create item by existing "${id}"`)
+      return
+    }
+
+    // Update state and wait until resolved
+    await new Promise((resolve) =>
+      this.setState({ newItemTitle: item.title }, resolve),
+    )
+
+    const newItemId = await this.createItem({
+      refreshItems: false,
+    })
+    await setItemLabels(newItemId, getItemLabels(item))
+    await this.refreshItems()
+  }
+
+  @autobind
+  async handleNewItemTitleKeyUp(event: React.KeyboardEvent) {
+    // Create item on ENTER
+    if (event.keyCode === Key.Enter && this.state.newItemTitle) {
+      await this.createItem()
+      return
+    }
+
+    // Update new item title in state
+    // The target refers to the HTMLInputElement, but is of type EventTarget
+    const newItemTitle = String((event.target as any).value)
+    this.setState({
+      newItemTitle,
+    })
+  }
+
+  async createItem(
+    options: {
+      refreshItems: boolean
+    } = { refreshItems: true },
+  ): Promise<string> {
+    this.setState({ isCreatingItem: true })
+
+    const data = { title: this.state.newItemTitle }
+
+    try {
+      const id = await createItem(data)
+      this.setState({ newItemTitle: '' })
+      return id
+    } catch (err) {
+      console.error('Failed to create item', data, err)
+      this.notifyError('Toevoegen mislukt!', err)
+    } finally {
+      if (options.refreshItems) {
         await this.refreshItems()
-        this.setState({ isCreatingItem: false })
       }
+      this.setState({ isCreatingItem: false })
     }
   }
 
@@ -213,24 +299,51 @@ export default class ShoppingList extends Component<Props, State> {
   }
 
   renderNewItemForm() {
+    const newItemTitle = this.state.newItemTitle
     const isLoading = this.state.isLoading
+    const isCreatingItem = this.state.isCreatingItem
+    const isSearching = this.state.isSearching
+    const lastSearchQuery = this.state.lastSearchQuery
+    const searchResults = this.state.searchResults
+    const noResultsMessage =
+      lastSearchQuery && newItemTitle === lastSearchQuery
+        ? 'Geen producten gevonden..'
+        : null
 
     return (
-      <Input
-        value={this.state.newItemTitle}
-        disabled={isLoading || this.state.isCreatingItem}
-        prefix={
-          this.state.isCreatingItem ? (
-            <LoadingOutlined />
-          ) : (
-            <PlusCircleOutlined />
-          )
-        }
+      <Select
+        showSearch
+        value={newItemTitle}
+        disabled={isLoading || isCreatingItem}
         placeholder="Voeg product toe.."
-        autoComplete="on"
-        onChange={this.handleNewItemTitleChange}
+        onSearch={this.handleNewItemSearch}
+        onSelect={this.handleNewItemSelected}
         onKeyUp={this.handleNewItemTitleKeyUp}
-      />
+        defaultActiveFirstOption={false}
+        optionFilterProp="title"
+        autoClearSearchValue={false}
+        notFoundContent={isSearching ? <Spin size="small" /> : noResultsMessage}
+        style={{ width: '100%' }}
+      >
+        {searchResults.map((item) => (
+          <Option key={item.id} value={item.id} title={item.title}>
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <div style={{ flex: '1 1 auto' }}>{item.title}</div>
+              <div style={{ flex: '0 1 auto' }}>
+                {getItemLabels(item).map((label: string) => (
+                  <Tag color={getLabelColor(label)}>{label}</Tag>
+                ))}
+              </div>
+            </div>
+          </Option>
+        ))}
+      </Select>
     )
   }
 
@@ -259,7 +372,8 @@ export default class ShoppingList extends Component<Props, State> {
     return (
       <>
         <Divider orientation="left">
-          Boodschappen{items.length > 0 ? <small> ({items.length})</small> : ''}
+          Boodschappen
+          {items.length > 0 ? <small> ({items.length})</small> : ''}
         </Divider>
         <ConfigProvider
           renderEmpty={() => (

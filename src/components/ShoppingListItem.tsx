@@ -3,18 +3,11 @@ import autobind from 'autobind-decorator'
 import { List, Checkbox, Input, Select, Tag, ConfigProvider } from 'antd'
 import { CustomTagProps } from 'rc-select/lib/interface/generator'
 import { debounce } from 'helpful-decorators'
+import { Item, ItemLabel } from '../util/types'
+import getItemLabels from '../util/getItemLabels'
+import getLabelColor from '../util/getLabelColor'
 
 const { Option } = Select
-
-export type Item = {
-  id: string
-  title: string
-  createdAt: string
-  finishedAt?: string
-  labels?: ItemLabel[]
-}
-
-export type ItemLabel = string
 
 type Props = {
   item: Item
@@ -38,7 +31,7 @@ export default class ShoppingListItem extends Component<Props, State> {
   }
 
   getLabels(): ItemLabel[] {
-    return (this.props.item.labels || []).sort()
+    return getItemLabels(this.props.item)
   }
 
   getAllLabels(): ItemLabel[] {
@@ -77,33 +70,6 @@ export default class ShoppingListItem extends Component<Props, State> {
     if (labelsHaveChanged) {
       this.props.onLabelsChange(this.props.item, newLabels)
     }
-  }
-
-  getLabelColor(label: string): string {
-    const colors = [
-      'pink',
-      'red',
-      'yellow',
-      'orange',
-      'cyan',
-      'green',
-      'blue',
-      'purple',
-      'geekblue',
-      'magenta',
-      'volcano',
-      'gold',
-      'lime',
-    ]
-
-    // Deterministic colors
-    const index =
-      label
-        .toLowerCase()
-        .split('')
-        .reduce((total, char) => total + char.charCodeAt(0), 0) % colors.length
-
-    return colors[index]
   }
 
   render() {
@@ -175,7 +141,7 @@ export default class ShoppingListItem extends Component<Props, State> {
 
     return (
       <Tag
-        color={this.getLabelColor(String(value))}
+        color={getLabelColor(String(value))}
         closable={closable}
         onClose={onClose}
       >
