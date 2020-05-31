@@ -43,13 +43,62 @@ export default class ShoppingList extends Component<Props, State> {
   }
 
   async refreshItems() {
-    const items = await listUnfinishedItems()
+    const items = (await listUnfinishedItems()) as Item[]
+    this.sortItems(items)
     this.setState({ items })
   }
 
   async refreshItemsLabels() {
     const labels = await listItemsLabels()
     this.setState({ labels })
+  }
+
+  /**
+   * Smart sorting by known labels
+   * These labels are ordered by our store route
+   *
+   * 1. Items without labels
+   * 2. Items with known labels (in order of known labels)
+   * 3. Items with unknown labels (sorted by amount)
+   * 4. On equal labels/label amounts: sort by title
+   */
+  sortItems(items: Item[]) {
+    const knownLabels = [
+      'Groente & Fruit',
+      'Vega & Vlees',
+      'Deli',
+      'Brood',
+      'Zuivel',
+      'Houdbaar',
+      'Drinken',
+      'Diepvries',
+      'Non-Food',
+    ]
+
+    function score(item: Item) {
+      const labels = item.labels || []
+
+      // Find index of first known label
+      let knownLabelIndex = knownLabels.findIndex((knownLabel: string) =>
+        labels.includes(knownLabel),
+      )
+
+      // If labels are available, but no known label is included:
+      // add high value to move to the bottom of the list
+      if (labels.length && knownLabelIndex === -1) {
+        knownLabelIndex = knownLabels.length
+      }
+
+      // Index starts at 0, so add 1 to ensure we don't use negative numbers
+      // Multiple index by 100 to give precendence to first 99 labels
+      return labels.length + (knownLabelIndex + 1) * 100
+    }
+
+    // Sort by score or by title on equal score
+    items.sort(
+      (a: Item, b: Item) =>
+        score(a) - score(b) + a.title.localeCompare(b.title),
+    )
   }
 
   @autobind
