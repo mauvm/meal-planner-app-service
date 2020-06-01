@@ -319,6 +319,7 @@ export default class ShoppingList extends Component<Props, State> {
         onSearch={this.handleNewItemSearch}
         onSelect={this.handleNewItemSelected}
         onKeyUp={this.handleNewItemTitleKeyUp}
+        showArrow={false}
         defaultActiveFirstOption={false}
         optionFilterProp="title"
         autoClearSearchValue={false}
