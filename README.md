@@ -1,18 +1,24 @@
 # Meal Planner: App Service
 
-> Provide graphical user interface via web server
+> Web interface via NextJS server
 
-## Usage
+This TypeScript service is part of the [Meal Planner project](https://github.com/users/mauvm/projects/1).
+
+## Local Development
 
 ```bash
 yarn install
 yarn dev
 ```
 
-## Deploy
+## Deploy to Production
 
 ```bash
-minikube docker-env | Invoke-Expression # On Windows
+# Configure Docker CLI
+eval $(minikube docker-env) # Or "minikube docker-env | Invoke-Expression" on Windows
+
+# Build Docker image
 docker build -t app-service .
-# Deploy via infrastructure/
+
+# Deploy via infrastructure repository
 ```
