@@ -6,6 +6,21 @@ This TypeScript service is part of the [Meal Planner project](https://github.com
 
 ## Local Development
 
+Prerequisites:
+
+- [NodeJS v10+](https://nodejs.org/en/)
+- [yarn](https://yarnpkg.com/)
+- [Auth0 Application credentials](https://github.com/auth0/nextjs-auth0#getting-started)
+
+Configure the project:
+
+```bash
+cp .env.example .env
+edit .env
+```
+
+Then install the dependencies and run app in development mode:
+
 ```bash
 yarn install
 yarn dev
