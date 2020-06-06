@@ -1,50 +1,83 @@
 import { Component } from 'react'
-import Router from 'next/router'
 import axios from 'axios'
-import { Divider } from 'antd'
+import { notification, Divider, Button } from 'antd'
+import { LoadingOutlined, UserOutlined } from '@ant-design/icons'
+import HttpStatus from 'http-status-codes'
+import fetchMe from '../api/auth/fetchMe'
 import ShoppingList from '../components/ShoppingList'
 import MainLayout from '../components/MainLayout'
-import auth0 from '../util/auth0'
 
-type Props = {
-  accessToken?: string
-  username?: string
+type Props = {}
+type State = {
+  isAuthorizing: boolean
+  isAuthorized: boolean
+  username: string
 }
-type State = {}
 
 export default class IndexPage extends Component<Props, State> {
-  componentDidMount() {
-    this.verifyAccessToken()
-  }
+  constructor(props: Props) {
+    super(props)
 
-  isLoggedIn(): boolean {
-    return Boolean(this.props.accessToken)
-  }
-
-  verifyAccessToken() {
-    if (!this.isLoggedIn()) {
-      Router.push('/api/auth/login')
-      return
+    this.state = {
+      isAuthorizing: true,
+      isAuthorized: false,
+      username: '',
     }
+  }
 
-    // Use access token for all API calls
-    const sameDomain = `${window.location.protocol}//${window.location.host}`
+  componentDidMount() {
+    this.authorize()
+  }
 
-    axios.interceptors.request.use((config) => {
-      if (config.url.startsWith(sameDomain)) {
-        config.headers.Authorization = `Bearer ${this.props.accessToken}`
+  async authorize() {
+    try {
+      // Check if logged in (has session)
+      const me = await fetchMe()
+
+      // Use access token for all API calls
+      const apiDomain = `${window.location.protocol}//${window.location.host}`
+
+      axios.interceptors.request.use((config) => {
+        if (config.url.startsWith(apiDomain)) {
+          config.headers.Authorization = `Bearer ${me.accessToken}`
+        }
+
+        return config
+      })
+
+      this.setState({
+        isAuthorizing: false,
+        isAuthorized: true,
+        username: me.username,
+      })
+    } catch (err) {
+      // Not logged in
+      if (err.response?.status === HttpStatus.UNAUTHORIZED) {
+        this.setState({
+          isAuthorizing: false,
+          isAuthorized: false,
+        })
+        return
       }
 
-      return config
-    })
+      console.error('Error logging in', { ...err })
+      notification.error({
+        message: 'Fout bij inloggen!',
+        description: err.message,
+        placement: 'topRight',
+      })
+    }
   }
 
   render() {
-    const username = this.props.username
+    const isAuthorizing = this.state.isAuthorizing
+    const isAuthorized = this.state.isAuthorized
+    const username = this.state.username
 
     return (
       <MainLayout>
-        {this.isLoggedIn() ? (
+        {isAuthorizing && <LoadingOutlined />}
+        {!isAuthorizing && isAuthorized && (
           <>
             <ShoppingList />
             <Divider orientation="right" plain>
@@ -53,31 +86,13 @@ export default class IndexPage extends Component<Props, State> {
               <a href="/api/auth/logout">Uitloggen</a>
             </Divider>
           </>
-        ) : (
-          <>Redirecting to login page..</>
+        )}
+        {!isAuthorizing && !isAuthorized && (
+          <Button type="primary" icon={<UserOutlined />} href="/api/auth/login">
+            Inloggen
+          </Button>
         )}
       </MainLayout>
     )
-  }
-}
-
-export async function getServerSideProps({
-  req,
-  res,
-}): Promise<{ props: Props }> {
-  try {
-    const tokenCache = auth0.tokenCache(req, res)
-    const { accessToken } = await tokenCache.getAccessToken()
-    const session = await auth0.getSession(req)
-
-    return {
-      props: {
-        accessToken,
-        username: session.user.name,
-      },
-    }
-  } catch (err) {
-    console.error('Could not fetch access token:', err.message)
-    return { props: {} }
   }
 }

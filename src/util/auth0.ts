@@ -1,14 +1,21 @@
-import getConfig from 'next/config'
+import dotenv from 'dotenv'
 import { initAuth0 } from '@auth0/nextjs-auth0'
 
-const { serverRuntimeConfig } = getConfig()
-const config = serverRuntimeConfig.auth0
+dotenv.config()
+
+const config = {
+  host: process.env.NEXTJS_HOST || 'http://localhost:8080',
+  domain: process.env.AUTH0_DOMAIN,
+  clientId: process.env.AUTH0_CLIENT_ID,
+  clientSecret: process.env.AUTH0_CLIENT_SECRET,
+  cookieSecret: process.env.AUTH0_COOKIE_SECRET,
+}
 
 export default initAuth0({
   domain: config.domain,
   clientId: config.clientId,
   clientSecret: config.clientSecret,
-  audience: serverRuntimeConfig.host,
+  audience: config.host,
   scope: [
     'openid',
     // Get name of user
@@ -18,12 +25,12 @@ export default initAuth0({
     // Ensure we'll receive a refresh token
     'offline_access',
   ].join(' '),
-  redirectUri: `${serverRuntimeConfig.host}/api/auth/callback`,
-  postLogoutRedirectUri: `${serverRuntimeConfig.host}/`,
+  redirectUri: `${config.host}/api/auth/callback`,
+  postLogoutRedirectUri: `${config.host}/`,
   session: {
     cookieSecret: config.cookieSecret,
     cookieLifetime: 60 * 60 * 8, // 8 hours
-    // cookieDomain: serverRuntimeConfig.host, // Breaks session creation
+    // cookieDomain: config.host, // Breaks session creation
     storeIdToken: true,
     storeAccessToken: true,
     storeRefreshToken: true,
