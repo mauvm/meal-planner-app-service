@@ -10,6 +10,9 @@ export default async function callback(
     await auth0.handleCallback(req, res, { redirectTo: '/' })
   } catch (err) {
     console.error('Error handling Auth0 callback', err)
-    res.status(err.status || HttpStatus.BAD_REQUEST).end(err.message)
+
+    res
+      .status(err.status || HttpStatus.BAD_REQUEST)
+      .json({ message: err.message })
   }
 }

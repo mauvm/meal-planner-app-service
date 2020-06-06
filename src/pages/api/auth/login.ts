@@ -11,6 +11,9 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
     })
   } catch (err) {
     console.error('Error logging in to Auth0', err)
-    res.status(err.status || HttpStatus.UNAUTHORIZED).end(err.message)
+
+    res
+      .status(err.status || HttpStatus.UNAUTHORIZED)
+      .json({ message: err.message })
   }
 }

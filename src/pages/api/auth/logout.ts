@@ -10,6 +10,9 @@ export default async function logout(
     await auth0.handleLogout(req, res)
   } catch (err) {
     console.error('Error logging out of Auth0', err)
-    res.status(err.status || HttpStatus.UNAUTHORIZED).end(err.message)
+
+    res
+      .status(err.status || HttpStatus.UNAUTHORIZED)
+      .json({ message: err.message })
   }
 }
