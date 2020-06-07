@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import HttpStatus from 'http-status-codes'
-import auth0 from '../../../util/auth0'
+import auth0 from '../../../../util/auth0'
 
 export default async function logout(
   req: NextApiRequest,

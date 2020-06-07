@@ -75,12 +75,16 @@ export default class IndexPage extends Component<Props, State> {
             <Divider orientation="right" plain>
               Hoi {username}!
               <Divider type="vertical" plain />
-              <a href="/api/auth/logout">Uitloggen</a>
+              <a href="/api/v1/auth/logout">Uitloggen</a>
             </Divider>
           </>
         )}
         {!isAuthorizing && !isAuthorized && (
-          <Button type="primary" icon={<UserOutlined />} href="/api/auth/login">
+          <Button
+            type="primary"
+            icon={<UserOutlined />}
+            href="/api/v1/auth/login"
+          >
             Inloggen
           </Button>
         )}

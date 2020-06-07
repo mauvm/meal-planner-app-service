@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
 import { initAuth0 } from '@auth0/nextjs-auth0'
+import AccessTokenError from '@auth0/nextjs-auth0/dist/tokens/access-token-error'
 
 dotenv.config()
 
@@ -15,6 +16,8 @@ const config = {
   cookieSecret: process.env.AUTH0_COOKIE_SECRET,
 }
 
+export { AccessTokenError }
+
 export default initAuth0({
   domain: config.domain,
   clientId: config.clientId,
@@ -29,7 +32,7 @@ export default initAuth0({
     // Ensure we'll receive a refresh token
     'offline_access',
   ].join(' '),
-  redirectUri: `${config.host}/api/auth/callback`,
+  redirectUri: `${config.host}/api/v1/auth/callback`,
   postLogoutRedirectUri: `${config.host}/`,
   session: {
     cookieSecret: config.cookieSecret,

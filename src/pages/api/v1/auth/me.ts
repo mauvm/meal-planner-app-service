@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import HttpStatus from 'http-status-codes'
-import auth0 from '../../../util/auth0'
+import auth0, { AccessTokenError } from '../../../../util/auth0'
 
 export default async function me(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -13,10 +13,15 @@ export default async function me(req: NextApiRequest, res: NextApiResponse) {
       username: session.user.name,
     })
   } catch (err) {
-    console.error('Error fetching JWT or user info', err)
+    // Not logged in or session expired
+    if (err instanceof AccessTokenError) {
+      res.status(HttpStatus.UNAUTHORIZED).json({ message: 'Unauthorized' })
+      return
+    }
 
+    console.error('Error fetching JWT or user info', err)
     res
-      .status(err.status || HttpStatus.UNAUTHORIZED)
+      .status(err.status || HttpStatus.INTERNAL_SERVER_ERROR)
       .json({ message: err.message })
   }
 }
