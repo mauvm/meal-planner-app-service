@@ -4,10 +4,14 @@ import { initAuth0 } from '@auth0/nextjs-auth0'
 dotenv.config()
 
 const config = {
-  host: process.env.NEXTJS_HOST || 'http://localhost:8080',
+  host:
+    process.env.NEXTJS_HOST ||
+    process.env.HOST_DOMAIN ||
+    'http://localhost:8080',
   domain: process.env.AUTH0_DOMAIN,
   clientId: process.env.AUTH0_CLIENT_ID,
   clientSecret: process.env.AUTH0_CLIENT_SECRET,
+  audience: process.env.AUTH0_AUDIENCE,
   cookieSecret: process.env.AUTH0_COOKIE_SECRET,
 }
 
@@ -15,7 +19,7 @@ export default initAuth0({
   domain: config.domain,
   clientId: config.clientId,
   clientSecret: config.clientSecret,
-  audience: config.host,
+  audience: config.audience,
   scope: [
     'openid',
     // Get name of user

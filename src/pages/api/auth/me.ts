@@ -13,7 +13,7 @@ export default async function me(req: NextApiRequest, res: NextApiResponse) {
       username: session.user.name,
     })
   } catch (err) {
-    console.error('Error fetching JWT or user info', err.message)
+    console.error('Error fetching JWT or user info', err)
 
     res
       .status(err.status || HttpStatus.UNAUTHORIZED)
