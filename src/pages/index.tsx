@@ -1,9 +1,9 @@
 import { Component } from 'react'
-import axios from 'axios'
 import { notification, Divider, Button } from 'antd'
 import { LoadingOutlined, UserOutlined } from '@ant-design/icons'
 import HttpStatus from 'http-status-codes'
 import fetchMe from '../api/auth/fetchMe'
+import user from '../util/user'
 import ShoppingList from '../components/ShoppingList'
 import MainLayout from '../components/MainLayout'
 
@@ -34,16 +34,8 @@ export default class IndexPage extends Component<Props, State> {
       // Check if logged in (has session)
       const me = await fetchMe()
 
-      // Use access token for all API calls
-      const apiDomain = `${window.location.protocol}//${window.location.host}`
-
-      axios.interceptors.request.use((config) => {
-        if (config.url.startsWith(apiDomain)) {
-          config.headers.Authorization = `Bearer ${me.accessToken}`
-        }
-
-        return config
-      })
+      // Assign user state
+      Object.assign(user, me)
 
       this.setState({
         isAuthorizing: false,

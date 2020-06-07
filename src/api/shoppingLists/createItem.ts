@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { getHost } from './service'
+import user from '../../util/user'
 
 export default async function createItem(data: {
   title: string
@@ -7,6 +8,11 @@ export default async function createItem(data: {
   const response = await axios.post(
     `${getHost()}/v1/shopping-lists/items`,
     data,
+    {
+      headers: {
+        authorization: `Bearer ${user.accessToken}`,
+      },
+    },
   )
   const newId = response.data.data?.id
 
