@@ -1,3 +1,5 @@
+// User state that is being set by pages/index.ts
+
 type User = {
   accessToken: string
   username: string

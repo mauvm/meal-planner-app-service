@@ -30,6 +30,12 @@ export default class IndexPage extends Component<Props, State> {
   }
 
   async authorize() {
+    this.setState({
+      isAuthorizing: true,
+      isAuthorized: false,
+      username: '',
+    })
+
     try {
       // Check if logged in (has session)
       const me = await fetchMe()
