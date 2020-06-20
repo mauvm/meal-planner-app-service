@@ -10,8 +10,8 @@ module.exports = (phase) => {
     },
 
     publicRuntimeConfig: {
-      // Empty for same domain (i.e. `${shoppingListServiceHost}/v1/shopping-lists/items`)
-      shoppingListServiceHost: isDevelopment ? 'http://localhost:3000' : '',
+      // Empty for same domain (i.e. `${listServiceHost}/v1/lists/items`)
+      listServiceHost: isDevelopment ? 'http://localhost:3000' : '',
     },
   })
 }

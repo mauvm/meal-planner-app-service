@@ -4,7 +4,7 @@ import user from '../../util/user'
 
 export default async function finishItem(id: string): Promise<void> {
   await axios.post(
-    `${getHost()}/v1/shopping-lists/items/${id}/finish`,
+    `${getHost()}/v1/lists/items/${id}/finish`,
     {},
     {
       headers: {

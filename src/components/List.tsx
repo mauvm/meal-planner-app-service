@@ -2,7 +2,7 @@ import { Component } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
 import {
-  List,
+  List as AntList,
   Select,
   Divider,
   Tag,
@@ -12,14 +12,14 @@ import {
   Spin,
 } from 'antd'
 import { debounce } from 'helpful-decorators'
-import ShoppingListItem from './ShoppingListItem'
-import createItem from '../api/shoppingLists/createItem'
-import searchItems from '../api/shoppingLists/searchItems'
-import finishItem from '../api/shoppingLists/finishItem'
-import setItemTitle from '../api/shoppingLists/setItemTitle'
-import setItemLabels from '../api/shoppingLists/setItemLabels'
-import listUnfinishedItems from '../api/shoppingLists/listUnfinishedItems'
-import listItemsLabels from '../api/shoppingLists/listItemsLabels'
+import ListItem from './ListItem'
+import createItem from '../api/lists/createItem'
+import searchItems from '../api/lists/searchItems'
+import finishItem from '../api/lists/finishItem'
+import setItemTitle from '../api/lists/setItemTitle'
+import setItemLabels from '../api/lists/setItemLabels'
+import listUnfinishedItems from '../api/lists/listUnfinishedItems'
+import listItemsLabels from '../api/lists/listItemsLabels'
 import { Item, ItemLabel } from '../util/types'
 import getLabelColor from '../util/getLabelColor'
 import getItemLabels from '../util/getItemLabels'
@@ -44,7 +44,7 @@ type State = {
   updatingItems: string[]
 }
 
-export default class ShoppingList extends Component<Props, State> {
+export default class List extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
@@ -354,7 +354,7 @@ export default class ShoppingList extends Component<Props, State> {
     const labels = this.state.labels
 
     return (
-      <ShoppingListItem
+      <ListItem
         key={item.id}
         item={item}
         existingLabels={labels}
@@ -384,7 +384,7 @@ export default class ShoppingList extends Component<Props, State> {
             />
           )}
         >
-          <List
+          <AntList
             size="small"
             header={this.renderNewItemForm()}
             bordered

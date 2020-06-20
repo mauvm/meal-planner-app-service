@@ -1,16 +1,15 @@
 import axios from 'axios'
 import { getHost } from './service'
-import { ItemLabel } from '../../util/types'
 import user from '../../util/user'
 
-export default async function setItemLabels(
+export default async function setItemTitle(
   id: string,
-  labels: ItemLabel[],
+  title: string,
 ): Promise<void> {
-  await axios.post(
-    `${getHost()}/v1/shopping-lists/items/${id}/set-labels`,
+  await axios.patch(
+    `${getHost()}/v1/lists/items/${id}`,
     {
-      labels,
+      title,
     },
     {
       headers: {

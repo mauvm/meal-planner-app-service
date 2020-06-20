@@ -1,9 +1,9 @@
 import getConfig from 'next/config'
 
 const {
-  publicRuntimeConfig: { shoppingListServiceHost },
+  publicRuntimeConfig: { listServiceHost },
 } = getConfig()
 
 export function getHost(): string {
-  return shoppingListServiceHost
+  return listServiceHost
 }

@@ -22,7 +22,7 @@ type State = {
   title: string
 }
 
-export default class ShoppingListItem extends Component<Props, State> {
+export default class ListItem extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
