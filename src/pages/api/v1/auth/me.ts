@@ -7,10 +7,16 @@ export default async function me(req: NextApiRequest, res: NextApiResponse) {
     const tokenCache = auth0.tokenCache(req, res)
     const { accessToken } = await tokenCache.getAccessToken()
     const session = await auth0.getSession(req)
+    let username = String(session.user.name || '')
+
+    // Abbreviate to first name
+    if (username.includes(' ')) {
+      username = username.substr(0, username.indexOf(' '))
+    }
 
     res.json({
       accessToken,
-      username: session.user.name,
+      username,
     })
   } catch (err) {
     // Not logged in or session expired
