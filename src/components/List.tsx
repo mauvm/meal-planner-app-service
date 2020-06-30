@@ -169,18 +169,16 @@ export default class List extends Component<Props, State> {
       this.setState({ newItemTitle: item.title }, resolve),
     )
 
-    const newItemId = await this.createItem({
-      refreshItems: false,
-    })
-    await setItemLabels(newItemId, getItemLabels(item))
-    await this.refreshItems()
+    const title = item.title
+    const labels = getItemLabels(item)
+    await this.createItem({ title, labels })
   }
 
   @autobind
   async handleNewItemTitleKeyUp(event: React.KeyboardEvent) {
     // Create item on ENTER
     if (event.keyCode === Key.Enter && this.state.newItemTitle) {
-      await this.createItem()
+      await this.createItem({ title: this.state.newItemTitle, labels: [] })
       return
     }
 
@@ -192,27 +190,18 @@ export default class List extends Component<Props, State> {
     })
   }
 
-  async createItem(
-    options: {
-      refreshItems: boolean
-    } = { refreshItems: true },
-  ): Promise<string> {
+  async createItem(data: { title: string; labels: ItemLabel[] }) {
     this.setState({ isCreatingItem: true })
 
-    const data = { title: this.state.newItemTitle }
-
     try {
-      const id = await createItem(data)
+      await createItem(data)
       this.setState({ newItemTitle: '' })
-      return id
     } catch (err) {
       console.error('Failed to create item', data, err)
       this.notifyError('Toevoegen mislukt!', err)
     } finally {
-      if (options.refreshItems) {
-        await this.refreshItems()
-      }
       this.setState({ isCreatingItem: false })
+      await this.refreshItems()
     }
   }
 
