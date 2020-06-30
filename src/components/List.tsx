@@ -196,12 +196,12 @@ export default class List extends Component<Props, State> {
     try {
       await createItem(data)
       this.setState({ newItemTitle: '' })
+      await this.refreshItems()
     } catch (err) {
       console.error('Failed to create item', data, err)
       this.notifyError('Toevoegen mislukt!', err)
     } finally {
       this.setState({ isCreatingItem: false })
-      await this.refreshItems()
     }
   }
 
