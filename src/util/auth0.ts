@@ -36,7 +36,7 @@ export default initAuth0({
   postLogoutRedirectUri: `${config.host}/`,
   session: {
     cookieSecret: config.cookieSecret,
-    cookieLifetime: 60 * 60 * 8, // 8 hours
+    cookieLifetime: 30 * 24 * 60 * 60, // seconds
     // cookieDomain: config.host, // Breaks session creation
     storeIdToken: true,
     storeAccessToken: true,
