@@ -3,11 +3,12 @@ import { getHost } from './service'
 import user from '../../util/user'
 
 export default async function setItemTitle(
-  id: string,
+  listId: string,
+  itemId: string,
   title: string,
 ): Promise<void> {
   await axios.patch(
-    `${getHost()}/v1/lists/items/${id}`,
+    `${getHost()}/v1/lists/${listId}/items/${itemId}`,
     {
       title,
     },

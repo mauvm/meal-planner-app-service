@@ -3,38 +3,39 @@ import autobind from 'autobind-decorator'
 import { List, Checkbox, Input, Select, Tag, ConfigProvider } from 'antd'
 import { CustomTagProps } from 'rc-select/lib/interface/generator'
 import { debounce } from 'helpful-decorators'
-import { Item, ItemLabel } from '../util/types'
+import { ListItem, ListItemLabel } from '../util/types'
 import getItemLabels from '../util/getItemLabels'
 import getLabelColor from '../util/getLabelColor'
 
 const { Option } = Select
 
 type Props = {
-  item: Item
-  existingLabels: ItemLabel[]
+  item: ListItem
+  existingLabels: ListItemLabel[]
   isUpdating?: boolean
-  onFinish: (item: Item) => Promise<void>
-  onTitleChange: (item: Item, title: string) => Promise<void>
-  onLabelsChange: (item: Item, labels: ItemLabel[]) => Promise<void>
+  onFinish: (item: ListItem) => Promise<void>
+  onTitleChange: (item: ListItem, title: string) => Promise<void>
+  onLabelsChange: (item: ListItem, labels: ListItemLabel[]) => Promise<void>
 }
 
 type State = {
   title: string
 }
 
-export default class ListItem extends Component<Props, State> {
+export default class ListItemComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
+
     this.state = {
       title: props.item.title,
     }
   }
 
-  getLabels(): ItemLabel[] {
+  getLabels(): ListItemLabel[] {
     return getItemLabels(this.props.item)
   }
 
-  getAllLabels(): ItemLabel[] {
+  getAllLabels(): ListItemLabel[] {
     const labels = this.getLabels()
     const existingLabels = this.props.existingLabels
 

@@ -1,9 +1,14 @@
-export type Item = {
+export type List = {
+  id: string
+  title: string
+}
+
+export type ListItem = {
   id: string
   title: string
   createdAt: string
   finishedAt?: string
-  labels?: ItemLabel[]
+  labels?: ListItemLabel[]
 }
 
-export type ItemLabel = string
+export type ListItemLabel = string

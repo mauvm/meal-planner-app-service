@@ -8,45 +8,46 @@ import {
   Tag,
   ConfigProvider,
   Empty,
-  notification,
   Spin,
 } from 'antd'
 import { debounce } from 'helpful-decorators'
-import ListItem from './ListItem'
+import { notifyError } from '../util/notify'
+import { List, ListItem, ListItemLabel } from '../util/types'
+import ListItemComponent from './ListItem'
 import createItem from '../api/lists/createItem'
 import searchItems from '../api/lists/searchItems'
 import finishItem from '../api/lists/finishItem'
 import setItemTitle from '../api/lists/setItemTitle'
 import setItemLabels from '../api/lists/setItemLabels'
-import listUnfinishedItems from '../api/lists/listUnfinishedItems'
-import listItemsLabels from '../api/lists/listItemsLabels'
-import { Item, ItemLabel } from '../util/types'
+import fetchUnfinishedItems from '../api/lists/fetchUnfinishedItems'
+import fetchItemsLabels from '../api/lists/fetchItemsLabels'
 import getLabelColor from '../util/getLabelColor'
 import getItemLabels from '../util/getItemLabels'
 
 const { Option } = Select
 
-type Props = {}
+type Props = List & {}
 
 type State = {
   isLoading: boolean
 
-  items: Item[]
-  labels: ItemLabel[]
+  items: ListItem[]
+  labels: ListItemLabel[]
 
   newItemTitle: string
   isCreatingItem: boolean
 
   isSearching: boolean
   lastSearchQuery: string
-  searchResults: Item[]
+  searchResults: ListItem[]
 
   updatingItems: string[]
 }
 
-export default class List extends Component<Props, State> {
+export default class ListComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
+
     this.state = {
       isLoading: true,
 
@@ -71,13 +72,15 @@ export default class List extends Component<Props, State> {
   }
 
   async refreshItems() {
-    const items = await listUnfinishedItems()
+    const listId = this.props.id
+    const items = await fetchUnfinishedItems(listId)
     this.sortItems(items)
     this.setState({ items })
   }
 
   async refreshItemsLabels() {
-    const labels = await listItemsLabels()
+    const listId = this.props.id
+    const labels = await fetchItemsLabels(listId)
     this.setState({ labels })
   }
 
@@ -90,7 +93,7 @@ export default class List extends Component<Props, State> {
    * 3. Items with unknown labels (sorted by amount)
    * 4. On equal labels/label amounts: sort by title
    */
-  sortItems(items: Item[]) {
+  sortItems(items: ListItem[]) {
     const knownLabels = [
       'Groente & Fruit',
       'Vega & Vlees',
@@ -103,7 +106,7 @@ export default class List extends Component<Props, State> {
       'Non-Food',
     ]
 
-    function score(item: Item) {
+    function score(item: ListItem) {
       const labels = getItemLabels(item)
 
       // Find index of first known label
@@ -124,7 +127,7 @@ export default class List extends Component<Props, State> {
 
     // Sort by score or by title on equal score
     items.sort(
-      (a: Item, b: Item) =>
+      (a: ListItem, b: ListItem) =>
         score(a) - score(b) + a.title.localeCompare(b.title),
     )
   }
@@ -137,9 +140,10 @@ export default class List extends Component<Props, State> {
     }
 
     this.setState({ isSearching: true, lastSearchQuery: query })
+    const listId = this.props.id
 
     try {
-      const items = (await searchItems(query)) as Item[]
+      const items = await searchItems(listId, query)
 
       // Ignore results if query changed
       if (query !== this.state.lastSearchQuery) {
@@ -148,8 +152,8 @@ export default class List extends Component<Props, State> {
 
       this.setState({ searchResults: items })
     } catch (err) {
-      console.error('Failed to search for items', query, err)
-      this.notifyError(`Zoeken naar "${query}" mislukt!`, err)
+      console.error('Failed to search for list items', query, err)
+      notifyError(`Zoeken naar "${query}" mislukt!`, err)
     } finally {
       this.setState({ isSearching: false })
     }
@@ -160,7 +164,7 @@ export default class List extends Component<Props, State> {
     const item = this.state.searchResults.find((item) => item.id === id)
 
     if (!item) {
-      console.error(`Could create item by existing "${id}"`)
+      console.error(`Could create list item by existing "${id}"`)
       return
     }
 
@@ -190,30 +194,33 @@ export default class List extends Component<Props, State> {
     })
   }
 
-  async createItem(data: { title: string; labels: ItemLabel[] }) {
+  async createItem(data: { title: string; labels: ListItemLabel[] }) {
     this.setState({ isCreatingItem: true })
+    const listId = this.props.id
 
     try {
-      await createItem(data)
+      await createItem(listId, data)
       this.setState({ newItemTitle: '' })
       await this.refreshItems()
     } catch (err) {
-      console.error('Failed to create item', data, err)
-      this.notifyError('Toevoegen mislukt!', err)
+      console.error('Failed to create list item', data, err)
+      notifyError('Toevoegen mislukt!', err)
     } finally {
       this.setState({ isCreatingItem: false })
     }
   }
 
   @autobind
-  async handleItemFinish(item: Item) {
+  async handleItemFinish(item: ListItem) {
+    const listId = this.props.id
+
     await this.updateItem(
       item,
       async () => {
         try {
-          await finishItem(item.id)
+          await finishItem(listId, item.id)
         } catch (err) {
-          console.error('Failed to finish item', item, err)
+          console.error('Failed to finish list item', item, err)
           throw err
         }
       },
@@ -222,14 +229,16 @@ export default class List extends Component<Props, State> {
   }
 
   @autobind
-  async handleItemTitleChange(item: Item, title: string) {
+  async handleItemTitleChange(item: ListItem, title: string) {
+    const listId = this.props.id
+
     await this.updateItem(
       item,
       async () => {
         try {
-          await setItemTitle(item.id, title)
+          await setItemTitle(listId, item.id, title)
         } catch (err) {
-          console.error('Failed to set item title', item, title, err)
+          console.error('Failed to set list item title', item, title, err)
           throw err
         }
       },
@@ -238,14 +247,16 @@ export default class List extends Component<Props, State> {
   }
 
   @autobind
-  async handleItemLabelsChange(item: Item, labels: ItemLabel[]) {
+  async handleItemLabelsChange(item: ListItem, labels: ListItemLabel[]) {
+    const listId = this.props.id
+
     await this.updateItem(
       item,
       async () => {
         try {
-          await setItemLabels(item.id, labels)
+          await setItemLabels(listId, item.id, labels)
         } catch (err) {
-          console.error('Failed to update item labels', item, labels, err)
+          console.error('Failed to update list item labels', item, labels, err)
           throw err
         } finally {
           await this.refreshItemsLabels()
@@ -256,7 +267,7 @@ export default class List extends Component<Props, State> {
   }
 
   async updateItem(
-    item: Item,
+    item: ListItem,
     updateFunction: () => Promise<void>,
     options: { failedMessage?: string } = {},
   ) {
@@ -268,7 +279,7 @@ export default class List extends Component<Props, State> {
     try {
       await updateFunction()
     } catch (err) {
-      this.notifyError(options.failedMessage || 'Aanpassing niet gelukt!', err)
+      notifyError(options.failedMessage || 'Aanpassing niet gelukt!', err)
     } finally {
       await this.refreshItems()
 
@@ -277,14 +288,6 @@ export default class List extends Component<Props, State> {
         updatingItems: this.state.updatingItems.filter((id) => id !== item.id),
       })
     }
-  }
-
-  notifyError(message: string, err: Error) {
-    notification.error({
-      message,
-      description: err.message,
-      placement: 'topRight',
-    })
   }
 
   renderNewItemForm() {
@@ -296,7 +299,7 @@ export default class List extends Component<Props, State> {
     const searchResults = this.state.searchResults
     const noResultsMessage =
       lastSearchQuery && newItemTitle === lastSearchQuery
-        ? 'Geen producten gevonden..'
+        ? 'Geen items gevonden..'
         : null
 
     return (
@@ -304,7 +307,7 @@ export default class List extends Component<Props, State> {
         showSearch
         value={newItemTitle}
         disabled={isLoading || isCreatingItem}
-        placeholder="Voeg product toe.."
+        placeholder="Voeg item toe.."
         onSearch={this.handleNewItemSearch}
         onSelect={this.handleNewItemSelected}
         onKeyUp={this.handleNewItemTitleKeyUp}
@@ -327,7 +330,9 @@ export default class List extends Component<Props, State> {
               <div style={{ flex: '1 1 auto' }}>{item.title}</div>
               <div style={{ flex: '0 1 auto' }}>
                 {getItemLabels(item).map((label: string) => (
-                  <Tag color={getLabelColor(label)}>{label}</Tag>
+                  <Tag key={label} color={getLabelColor(label)}>
+                    {label}
+                  </Tag>
                 ))}
               </div>
             </div>
@@ -338,12 +343,12 @@ export default class List extends Component<Props, State> {
   }
 
   @autobind
-  renderItem(item: Item) {
+  renderItem(item: ListItem) {
     const updatingItems = this.state.updatingItems
     const labels = this.state.labels
 
     return (
-      <ListItem
+      <ListItemComponent
         key={item.id}
         item={item}
         existingLabels={labels}
@@ -362,14 +367,14 @@ export default class List extends Component<Props, State> {
     return (
       <>
         <Divider orientation="left">
-          Boodschappen
+          {this.props.title}
           {items.length > 0 ? <small> ({items.length})</small> : ''}
         </Divider>
         <ConfigProvider
           renderEmpty={() => (
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={isLoading ? 'Laden..' : 'Geen producten'}
+              description={isLoading ? 'Laden..' : 'Geen items'}
             />
           )}
         >
