@@ -34,7 +34,7 @@ export default class Lists extends Component<Props, State> {
   }
 
   async refreshLists(): Promise<void> {
-    this.setState({ isLoading: true })
+    this.setState({ isLoading: true, lists: [] })
 
     const lists = await fetchLists()
     this.setState({ isLoading: false, lists })
@@ -64,7 +64,7 @@ export default class Lists extends Component<Props, State> {
       <>
         {isLoading && <LoadingOutlined />}
 
-        {lists.length === 0 && (
+        {!isLoading && lists.length === 0 && (
           <Button
             type="primary"
             icon={<PlusCircleOutlined />}
@@ -74,9 +74,9 @@ export default class Lists extends Component<Props, State> {
           </Button>
         )}
 
-        {lists.map((list) => (
-          <ListComponent key={list.id} {...list} />
-        ))}
+        {!isLoading &&
+          lists.length > 0 &&
+          lists.map((list) => <ListComponent key={list.id} {...list} />)}
       </>
     )
   }
