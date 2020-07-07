@@ -1,5 +1,5 @@
-import { Item, ItemLabel } from './types'
+import { ListItem, ListItemLabel } from './types'
 
-export default function getItemLabels(item: Item): ItemLabel[] {
+export default function getItemLabels(item: ListItem): ListItemLabel[] {
   return (item.labels || []).sort()
 }

@@ -3,17 +3,15 @@ import { getHost } from './service'
 import { ListItem } from '../../util/types'
 import user from '../../util/user'
 
-export default async function searchItems(
+export default async function fetchUnfinishedItems(
   listId: string,
-  query: string,
 ): Promise<ListItem[]> {
   const response = await axios.get(
-    `${getHost()}/v1/lists/${listId}/search-items`,
+    `${getHost()}/v1/lists/${listId}/unfinished-items`,
     {
       headers: {
         authorization: `Bearer ${user.accessToken}`,
       },
-      params: { query },
     },
   )
 

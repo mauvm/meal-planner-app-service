@@ -4,7 +4,7 @@ import { LoadingOutlined, UserOutlined } from '@ant-design/icons'
 import HttpStatus from 'http-status-codes'
 import fetchMe from '../api/auth/fetchMe'
 import user from '../util/user'
-import List from '../components/List'
+import Lists from '../components/Lists'
 import MainLayout from '../components/MainLayout'
 
 type Props = {}
@@ -77,7 +77,7 @@ export default class IndexPage extends Component<Props, State> {
         {isAuthorizing && <LoadingOutlined />}
         {!isAuthorizing && isAuthorized && (
           <>
-            <List />
+            <Lists />
             <Divider orientation="right" plain>
               Hoi {username}!
               <Divider type="vertical" plain />
