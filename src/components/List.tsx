@@ -116,13 +116,13 @@ export default class ListComponent extends Component<Props, State> {
 
       // If labels are available, but no known label is included:
       // add high value to move to the bottom of the list
-      if (labels.length && knownLabelIndex === -1) {
+      if (labels.length !== 0 && knownLabelIndex === -1) {
         knownLabelIndex = knownLabels.length
       }
 
       // Index starts at 0, so add 1 to ensure we don't use negative numbers
-      // Multiple index by 100 to give precendence to first 99 labels
-      return labels.length + (knownLabelIndex + 1) * 100
+      // Multiple index by known labels length to give precendence to known labels
+      return labels.length + (knownLabelIndex + 1) * knownLabels.length
     }
 
     // Sort by score or by title on equal score
