@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import { Component, createRef } from 'react'
 import autobind from 'autobind-decorator'
 import { Key } from 'ts-keycode-enum'
 import {
@@ -9,8 +9,15 @@ import {
   ConfigProvider,
   Empty,
   Spin,
+  Modal,
+  Input,
+  Form,
+  message,
 } from 'antd'
 import { debounce } from 'helpful-decorators'
+import { FormInstance } from 'antd/lib/form'
+import { InfoCircleOutlined, CopyOutlined } from '@ant-design/icons'
+import copy from 'copy-to-clipboard'
 import { notifyError } from '../util/notify'
 import { List, ListItem, ListItemLabel } from '../util/types'
 import ListItemComponent from './ListItem'
@@ -34,6 +41,8 @@ type State = {
   items: ListItem[]
   labels: ListItemLabel[]
 
+  listInfoModalVisible: boolean
+
   newItemTitle: string
   isCreatingItem: boolean
 
@@ -45,6 +54,8 @@ type State = {
 }
 
 export default class ListComponent extends Component<Props, State> {
+  private listInfoFormRef = createRef<FormInstance>()
+
   constructor(props: Props) {
     super(props)
 
@@ -53,6 +64,8 @@ export default class ListComponent extends Component<Props, State> {
 
       items: [],
       labels: [],
+
+      listInfoModalVisible: false,
 
       newItemTitle: '',
       isCreatingItem: false,
@@ -82,6 +95,16 @@ export default class ListComponent extends Component<Props, State> {
     const listId = this.props.id
     const labels = await fetchItemsLabels(listId)
     this.setState({ labels })
+  }
+
+  @autobind
+  showListInfoModal() {
+    this.setState({ listInfoModalVisible: true })
+  }
+
+  @autobind
+  hideListInfoModal() {
+    this.setState({ listInfoModalVisible: false })
   }
 
   /**
@@ -362,15 +385,31 @@ export default class ListComponent extends Component<Props, State> {
     )
   }
 
+  renderCopyButton(value: string) {
+    return (
+      <CopyOutlined
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          copy(value)
+          message.success('Uitnodigingscode gekopieerd!')
+        }}
+      />
+    )
+  }
+
   render() {
     const isLoading = this.state.isLoading
     const items = this.state.items
+    const inviteCode = this.props.inviteCode
 
     return (
       <>
         <Divider orientation="left">
-          {this.props.title}
-          {items.length > 0 ? <small> ({items.length})</small> : ''}
+          {this.props.title} {items.length > 0 ? `(${items.length})` : ''}{' '}
+          <InfoCircleOutlined
+            style={{ cursor: 'pointer' }}
+            onClick={this.showListInfoModal}
+          />
         </Divider>
         <ConfigProvider
           renderEmpty={() => (
@@ -388,6 +427,33 @@ export default class ListComponent extends Component<Props, State> {
             renderItem={this.renderItem}
           />
         </ConfigProvider>
+
+        <Modal
+          title={`${this.props.title} lijst`}
+          visible={this.state.listInfoModalVisible}
+          onCancel={this.hideListInfoModal}
+          onOk={() => this.listInfoFormRef.current.submit()}
+        >
+          <Form
+            ref={this.listInfoFormRef}
+            initialValues={{ inviteCode }}
+            labelCol={{ span: 8 }}
+            wrapperCol={{ span: 16 }}
+            onFinish={this.hideListInfoModal}
+          >
+            <Form.Item
+              name="inviteCode"
+              label="Uitnodigingscode:"
+              style={{ margin: 0 }}
+            >
+              <Input
+                maxLength={512}
+                addonAfter={this.renderCopyButton(inviteCode)}
+                disabled
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
       </>
     )
   }

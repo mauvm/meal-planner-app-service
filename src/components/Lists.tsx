@@ -1,10 +1,10 @@
-import { Component, createRef, ChangeEvent } from 'react'
+import { Component, createRef } from 'react'
 import autobind from 'autobind-decorator'
 import { Button, Space, Modal, Input, Form } from 'antd'
 import {
   LoadingOutlined,
   PlusCircleOutlined,
-  ShareAltOutlined,
+  LinkOutlined,
 } from '@ant-design/icons'
 import ListComponent from './List'
 import { notifyError } from '../util/notify'
@@ -65,13 +65,13 @@ export default class Lists extends Component<Props, State> {
   }
 
   @autobind
-  closeCreateListModal() {
+  hideCreateListModal() {
     this.setState({ createListModalVisible: false })
   }
 
   @autobind
   async createList({ title }) {
-    this.closeCreateListModal()
+    this.hideCreateListModal()
     this.setState({ isCreatingList: true })
     const data = { title }
 
@@ -94,15 +94,15 @@ export default class Lists extends Component<Props, State> {
   }
 
   @autobind
-  closeJoinListModal() {
+  hideJoinListModal() {
     this.setState({ joinListModalVisible: false })
   }
 
   @autobind
-  async joinList({ code }) {
-    this.closeJoinListModal()
+  async joinList({ inviteCode }) {
+    this.hideJoinListModal()
     this.setState({ isJoiningList: true })
-    const data = { code }
+    const data = { code: inviteCode }
 
     try {
       await joinList(data)
@@ -135,7 +135,7 @@ export default class Lists extends Component<Props, State> {
             Nieuwe lijst
           </Button>
           <Button
-            icon={<ShareAltOutlined />}
+            icon={<LinkOutlined />}
             loading={this.state.isJoiningList}
             onClick={this.showJoinListModal}
           >
@@ -150,7 +150,7 @@ export default class Lists extends Component<Props, State> {
         <Modal
           title="Uitnodiging accepteren"
           visible={this.state.createListModalVisible}
-          onCancel={this.closeCreateListModal}
+          onCancel={this.hideCreateListModal}
           onOk={() => this.createFormRef.current.submit()}
         >
           <Form
@@ -178,7 +178,7 @@ export default class Lists extends Component<Props, State> {
         <Modal
           title="Uitnodiging accepteren"
           visible={this.state.joinListModalVisible}
-          onCancel={this.closeJoinListModal}
+          onCancel={this.hideJoinListModal}
           onOk={() => this.inviteFormRef.current.submit()}
         >
           <Form
@@ -188,7 +188,7 @@ export default class Lists extends Component<Props, State> {
             onFinish={this.joinList}
           >
             <Form.Item
-              name="code"
+              name="inviteCode"
               label="Uitnodigingscode:"
               rules={[
                 {
