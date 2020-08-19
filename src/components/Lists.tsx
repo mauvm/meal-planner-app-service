@@ -143,6 +143,10 @@ export default class Lists extends Component<Props, State> {
           </Button>
         </Space>
 
+        {!isLoading &&
+          lists.length > 0 &&
+          lists.map((list) => <ListComponent key={list.id} {...list} />)}
+
         <Modal
           title="Uitnodiging accepteren"
           visible={this.state.createListModalVisible}
@@ -198,10 +202,6 @@ export default class Lists extends Component<Props, State> {
             </Form.Item>
           </Form>
         </Modal>
-
-        {!isLoading &&
-          lists.length > 0 &&
-          lists.map((list) => <ListComponent key={list.id} {...list} />)}
       </>
     )
   }
