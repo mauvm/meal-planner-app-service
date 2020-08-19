@@ -18,14 +18,18 @@ type Props = {}
 
 type State = {
   isLoading: boolean
+
+  createListModalVisible: boolean
   isCreatingList: boolean
 
   joinListModalVisible: boolean
+  isJoiningList: boolean
 
   lists: List[]
 }
 
 export default class Lists extends Component<Props, State> {
+  private createFormRef = createRef<FormInstance>()
   private inviteFormRef = createRef<FormInstance>()
 
   constructor(props: Props) {
@@ -33,9 +37,12 @@ export default class Lists extends Component<Props, State> {
 
     this.state = {
       isLoading: true,
+
+      createListModalVisible: false,
       isCreatingList: false,
 
       joinListModalVisible: false,
+      isJoiningList: false,
 
       lists: [],
     }
@@ -53,14 +60,25 @@ export default class Lists extends Component<Props, State> {
   }
 
   @autobind
-  async createList() {
+  showCreateListModal() {
+    this.setState({ createListModalVisible: true })
+  }
+
+  @autobind
+  closeCreateListModal() {
+    this.setState({ createListModalVisible: false })
+  }
+
+  @autobind
+  async createList({ title }) {
+    this.closeCreateListModal()
     this.setState({ isCreatingList: true })
-    const data = { title: 'Boodschappen' }
+    const data = { title }
 
     try {
       await createList(data)
     } catch (err) {
-      console.error('Failed to create item', data, err)
+      console.error('Failed to create list', data, err)
       notifyError('Toevoegen mislukt!', err)
       return
     } finally {
@@ -83,12 +101,17 @@ export default class Lists extends Component<Props, State> {
   @autobind
   async joinList({ code }) {
     this.closeJoinListModal()
+    this.setState({ isJoiningList: true })
+    const data = { code }
 
     try {
-      await joinList({ code })
+      await joinList(data)
     } catch (err) {
+      console.error('Failed to join list', data, err)
       notifyError('Uitnodiging accepteren mislukt!', err)
       return
+    } finally {
+      this.setState({ isJoiningList: false })
     }
 
     await this.refreshLists()
@@ -97,7 +120,6 @@ export default class Lists extends Component<Props, State> {
   render() {
     const isLoading = this.state.isLoading
     const lists = this.state.lists
-    const joinListModalVisible = this.state.joinListModalVisible
 
     return (
       <>
@@ -107,18 +129,51 @@ export default class Lists extends Component<Props, State> {
           <Button
             type="primary"
             icon={<PlusCircleOutlined />}
-            onClick={this.createList}
+            loading={this.state.isCreatingList}
+            onClick={this.showCreateListModal}
           >
             Nieuwe lijst
           </Button>
-          <Button icon={<ShareAltOutlined />} onClick={this.showJoinListModal}>
+          <Button
+            icon={<ShareAltOutlined />}
+            loading={this.state.isJoiningList}
+            onClick={this.showJoinListModal}
+          >
             Uitnodiging accepteren
           </Button>
         </Space>
 
         <Modal
           title="Uitnodiging accepteren"
-          visible={joinListModalVisible}
+          visible={this.state.createListModalVisible}
+          onCancel={this.closeCreateListModal}
+          onOk={() => this.createFormRef.current.submit()}
+        >
+          <Form
+            ref={this.createFormRef}
+            labelCol={{ span: 8 }}
+            wrapperCol={{ span: 16 }}
+            onFinish={this.createList}
+          >
+            <Form.Item
+              name="title"
+              label="Titel:"
+              rules={[
+                {
+                  required: true,
+                  message: 'Vul hier een titel in!',
+                },
+              ]}
+              style={{ margin: 0 }}
+            >
+              <Input maxLength={512} />
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        <Modal
+          title="Uitnodiging accepteren"
+          visible={this.state.joinListModalVisible}
           onCancel={this.closeJoinListModal}
           onOk={() => this.inviteFormRef.current.submit()}
         >
