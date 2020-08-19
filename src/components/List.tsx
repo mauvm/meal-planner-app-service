@@ -201,13 +201,15 @@ export default class ListComponent extends Component<Props, State> {
     try {
       await createItem(listId, data)
       this.setState({ newItemTitle: '' })
-      await this.refreshItems()
     } catch (err) {
       console.error('Failed to create list item', data, err)
       notifyError('Toevoegen mislukt!', err)
+      return
     } finally {
       this.setState({ isCreatingItem: false })
     }
+
+    await this.refreshItems()
   }
 
   @autobind
