@@ -148,10 +148,12 @@ export default class Lists extends Component<Props, State> {
           lists.map((list) => <ListComponent key={list.id} {...list} />)}
 
         <Modal
-          title="Uitnodiging accepteren"
+          title="Nieuwe lijst"
           visible={this.state.createListModalVisible}
           onCancel={this.hideCreateListModal}
           onOk={() => this.createFormRef.current.submit()}
+          cancelText="Terug"
+          okText="Voeg toe"
         >
           <Form
             ref={this.createFormRef}
@@ -180,6 +182,8 @@ export default class Lists extends Component<Props, State> {
           visible={this.state.joinListModalVisible}
           onCancel={this.hideJoinListModal}
           onOk={() => this.inviteFormRef.current.submit()}
+          cancelText="Terug"
+          okText="Accepteer"
         >
           <Form
             ref={this.inviteFormRef}
