@@ -1,18 +1,20 @@
 import { Component, createRef } from 'react'
 import autobind from 'autobind-decorator'
-import { Button, Space, Modal, Input, Form } from 'antd'
+import { Button, Typography, Modal, Input, Form, Space } from 'antd'
 import {
   LoadingOutlined,
   PlusCircleOutlined,
   LinkOutlined,
 } from '@ant-design/icons'
+import { FormInstance } from 'antd/lib/form'
 import ListComponent from './List'
 import { notifyError } from '../util/notify'
 import { List } from '../util/types'
 import fetchLists from '../api/lists/fetchLists'
 import createList from '../api/lists/createList'
 import joinList from '../api/lists/joinList'
-import { FormInstance } from 'antd/lib/form'
+
+const Paragraph = Typography.Paragraph
 
 type Props = {}
 
@@ -123,25 +125,27 @@ export default class Lists extends Component<Props, State> {
 
     return (
       <>
-        {isLoading && <LoadingOutlined />}
+        <Paragraph>
+          <Space>
+            <Button
+              type="primary"
+              icon={<PlusCircleOutlined />}
+              loading={this.state.isCreatingList}
+              onClick={this.showCreateListModal}
+            >
+              Nieuwe lijst
+            </Button>
+            <Button
+              icon={<LinkOutlined />}
+              loading={this.state.isJoiningList}
+              onClick={this.showJoinListModal}
+            >
+              Uitnodiging accepteren
+            </Button>
+          </Space>
+        </Paragraph>
 
-        <Space>
-          <Button
-            type="primary"
-            icon={<PlusCircleOutlined />}
-            loading={this.state.isCreatingList}
-            onClick={this.showCreateListModal}
-          >
-            Nieuwe lijst
-          </Button>
-          <Button
-            icon={<LinkOutlined />}
-            loading={this.state.isJoiningList}
-            onClick={this.showJoinListModal}
-          >
-            Uitnodiging accepteren
-          </Button>
-        </Space>
+        {isLoading && <LoadingOutlined />}
 
         {!isLoading &&
           lists.length > 0 &&
@@ -167,7 +171,7 @@ export default class Lists extends Component<Props, State> {
               rules={[
                 {
                   required: true,
-                  message: 'Vul hier een titel in!',
+                  message: 'Vul hier een titel in',
                 },
               ]}
               style={{ margin: 0 }}
@@ -197,7 +201,7 @@ export default class Lists extends Component<Props, State> {
               rules={[
                 {
                   required: true,
-                  message: 'Vul hier de uitnodigingscode in!',
+                  message: 'Vul hier de uitnodigingscode in',
                 },
               ]}
               style={{ margin: 0 }}
