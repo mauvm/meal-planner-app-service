@@ -1,6 +1,7 @@
 export type List = {
   id: string
   title: string
+  inviteCode: string
 }
 
 export type ListItem = {
