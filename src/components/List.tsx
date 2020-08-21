@@ -53,6 +53,18 @@ type State = {
   updatingItems: string[]
 }
 
+const KNOWN_LABELS: ListItemLabel[] = [
+  'Groente & Fruit',
+  'Vega & Vlees',
+  'Deli',
+  'Brood',
+  'Zuivel',
+  'Houdbaar',
+  'Drinken',
+  'Diepvries',
+  'Non-Food',
+]
+
 export default class ListComponent extends Component<Props, State> {
   private listInfoFormRef = createRef<FormInstance>()
 
@@ -93,7 +105,13 @@ export default class ListComponent extends Component<Props, State> {
 
   async refreshItemsLabels() {
     const listId = this.props.id
-    const labels = await fetchItemsLabels(listId)
+    const existingLabels = await fetchItemsLabels(listId)
+
+    // Make known labels available by default
+    const labels = existingLabels
+      .concat(KNOWN_LABELS)
+      .filter((label, index, all) => all.indexOf(label) === index) // Unique
+
     this.setState({ labels })
   }
 
@@ -117,35 +135,23 @@ export default class ListComponent extends Component<Props, State> {
    * 4. On equal labels/label amounts: sort by title
    */
   sortItems(items: ListItem[]) {
-    const knownLabels = [
-      'Groente & Fruit',
-      'Vega & Vlees',
-      'Deli',
-      'Brood',
-      'Zuivel',
-      'Houdbaar',
-      'Drinken',
-      'Diepvries',
-      'Non-Food',
-    ]
-
     function score(item: ListItem) {
       const labels = getItemLabels(item)
 
       // Find index of first known label
-      let knownLabelIndex = knownLabels.findIndex((knownLabel: string) =>
+      let knownLabelIndex = KNOWN_LABELS.findIndex((knownLabel: string) =>
         labels.includes(knownLabel),
       )
 
       // If labels are available, but no known label is included:
       // add high value to move to the bottom of the list
       if (labels.length !== 0 && knownLabelIndex === -1) {
-        knownLabelIndex = knownLabels.length
+        knownLabelIndex = KNOWN_LABELS.length
       }
 
       // Index starts at 0, so add 1 to ensure we don't use negative numbers
       // Multiple index by known labels length to give precendence to known labels
-      return labels.length + (knownLabelIndex + 1) * knownLabels.length
+      return labels.length + (knownLabelIndex + 1) * KNOWN_LABELS.length
     }
 
     // Sort by score or by title on equal score
@@ -433,6 +439,8 @@ export default class ListComponent extends Component<Props, State> {
           visible={this.state.listInfoModalVisible}
           onCancel={this.hideListInfoModal}
           onOk={() => this.listInfoFormRef.current.submit()}
+          cancelText="Annuleer"
+          okText="Sluiten"
         >
           <Form
             ref={this.listInfoFormRef}
