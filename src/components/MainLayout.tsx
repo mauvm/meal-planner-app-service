@@ -1,7 +1,4 @@
 import Head from 'next/head'
-import { Typography } from 'antd'
-
-const { Title } = Typography
 
 export default function MainLayout({ children, title = 'Boodschappen' }) {
   return (
