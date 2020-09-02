@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { Typography, Space, Button, Divider } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
+import { UserAddOutlined, UserOutlined } from '@ant-design/icons'
 
 const { Title, Paragraph } = Typography
 
@@ -16,8 +16,8 @@ export default class Homescreen extends Component<Props, State> {
         <Space>
           <Button
             type="default"
-            icon={<UserOutlined />}
-            href="/api/v1/auth/login"
+            icon={<UserAddOutlined />}
+            href="/api/v1/auth/signup"
           >
             Registreren
           </Button>
