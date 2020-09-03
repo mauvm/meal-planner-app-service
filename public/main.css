@@ -1,11 +1,17 @@
-/* Make sure we are able click on the empty area left to the select box for item labels */
+/* Make clickable area big enough for item labels select box */
 .ant-list-item .ant-select-selection-search {
   min-width: 1em;
 }
 
+/* Make top buttons are respsonsive */
 .ant-typography div {
   display: inline-block;
 }
 .ant-typography div.ant-space-item {
   margin-bottom: 8px;
+}
+
+/* Make dropdown for item labels is wide enough */
+.ant-select-dropdown {
+  min-width: 12em !important;
 }
