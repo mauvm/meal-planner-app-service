@@ -2,3 +2,10 @@
 .ant-list-item .ant-select-selection-search {
   min-width: 1em;
 }
+
+.ant-typography div {
+  display: inline-block;
+}
+.ant-typography div.ant-space-item {
+  margin-bottom: 8px;
+}
