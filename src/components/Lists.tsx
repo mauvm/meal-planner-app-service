@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons'
 import { FormInstance } from 'antd/lib/form'
 import ListComponent from './List'
+import GettingStartedButton from './GettingStartedButton'
 import { notifyError } from '../util/notify'
 import { List } from '../util/types'
 import fetchLists from '../api/lists/fetchLists'
@@ -127,6 +128,7 @@ export default class Lists extends Component<Props, State> {
       <>
         <Paragraph>
           <Space>
+            <GettingStartedButton />
             <Button
               type="primary"
               icon={<PlusCircleOutlined />}
