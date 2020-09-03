@@ -112,23 +112,25 @@ export default class ListItemComponent extends Component<Props, State> {
             />
           </div>
           <div style={{ flex: '0 1 auto' }}>
-            <ConfigProvider direction="rtl" renderEmpty={() => 'Geen items..'}>
-              <Select
-                mode="tags"
-                tagRender={this.renderTag}
-                value={labels}
-                disabled={isUpdating}
-                onChange={this.handleLabelsChange}
-                placeholder="Labels"
-                bordered={false}
-                style={{ minWidth: '12em' }}
-              >
-                {this.getAllLabels().map((label) => (
-                  <Option key={label} value={label}>
-                    {label}
-                  </Option>
-                ))}
-              </Select>
+            {/* Fix for notification messages suddenly being RTL as well */}
+            <ConfigProvider direction="ltr">
+              <ConfigProvider direction="rtl" renderEmpty={() => 'Geen items..'}>
+                <Select
+                  mode="tags"
+                  tagRender={this.renderTag}
+                  value={labels}
+                  disabled={isUpdating}
+                  onChange={this.handleLabelsChange}
+                  placeholder="Labels"
+                  bordered={false}
+                >
+                  {this.getAllLabels().map((label) => (
+                    <Option key={label} value={label}>
+                      {label}
+                    </Option>
+                  ))}
+                </Select>
+              </ConfigProvider>
             </ConfigProvider>
           </div>
         </div>

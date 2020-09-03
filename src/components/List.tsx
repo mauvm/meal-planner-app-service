@@ -336,7 +336,7 @@ export default class ListComponent extends Component<Props, State> {
     return (
       <Select
         showSearch
-        value={newItemTitle}
+        value={newItemTitle || undefined}
         disabled={isLoading || isCreatingItem}
         placeholder="Voeg item toe.."
         onSearch={this.handleNewItemSearch}
