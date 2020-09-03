@@ -10,6 +10,7 @@ export default function MainLayout({ children, title = 'Boodschappen' }) {
         <meta httpEquiv="cache-control" content="max-age=0" />
         <meta httpEquiv="cache-control" content="no-cache" />
         <meta httpEquiv="expires" content="0" />
+        <link rel="stylesheet" href="/main.css" type="text/css" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1"

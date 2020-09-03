@@ -1,0 +1,4 @@
+/* Make sure we are able click on the empty area left to the select box for item labels */
+.ant-list-item .ant-select-selection-search {
+  min-width: 1em;
+}

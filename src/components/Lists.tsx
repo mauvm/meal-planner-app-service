@@ -157,7 +157,7 @@ export default class Lists extends Component<Props, State> {
           onCancel={this.hideCreateListModal}
           onOk={() => this.createFormRef.current.submit()}
           cancelText="Terug"
-          okText="Voeg toe"
+          okText="Aanmaken"
         >
           <Form
             ref={this.createFormRef}
