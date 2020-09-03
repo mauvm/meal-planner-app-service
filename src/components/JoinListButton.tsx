@@ -1,13 +1,13 @@
 import { Component, createRef } from 'react'
 import { Button, Modal, Form, Input } from 'antd'
-import { PlusCircleOutlined } from '@ant-design/icons'
+import { LinkOutlined } from '@ant-design/icons'
 import { FormInstance } from 'antd/lib/form'
 import autobind from 'autobind-decorator'
-import createList from '../api/lists/createList'
+import joinList from '../api/lists/joinList'
 import { notifyError } from '../util/notify'
 
 type Props = {
-  onListCreated?: () => void | Promise<void>
+  onListJoined?: () => void | Promise<void>
 }
 type State = {
   isShowingModal: boolean
@@ -37,23 +37,23 @@ export default class CreateListButton extends Component<Props, State> {
   }
 
   @autobind
-  async createList({ title }) {
+  async joinList({ inviteCode }) {
     this.hideModal()
     this.setState({ isLoading: true })
-    const data = { title }
+    const data = { code: inviteCode }
 
     try {
-      await createList(data)
+      await joinList(data)
     } catch (err) {
-      console.error('Failed to create list', data, err)
-      notifyError('Toevoegen mislukt!', err)
+      console.error('Failed to join list', data, err)
+      notifyError('Uitnodiging accepteren mislukt!', err)
       return
     } finally {
       this.setState({ isLoading: false })
     }
 
-    if (this.props.onListCreated) {
-      this.props.onListCreated()
+    if (this.props.onListJoined) {
+      this.props.onListJoined()
     }
   }
 
@@ -61,35 +61,34 @@ export default class CreateListButton extends Component<Props, State> {
     return (
       <>
         <Button
-          type="primary"
-          icon={<PlusCircleOutlined />}
+          icon={<LinkOutlined />}
           loading={this.state.isLoading}
           onClick={this.showModal}
         >
-          Nieuwe lijst
+          Uitnodiging accepteren
         </Button>
 
         <Modal
-          title="Nieuwe lijst"
+          title="Uitnodiging accepteren"
           visible={this.state.isShowingModal}
           onCancel={this.hideModal}
           onOk={() => this.formRef.current.submit()}
           cancelText="Terug"
-          okText="Aanmaken"
+          okText="Accepteer"
         >
           <Form
             ref={this.formRef}
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
-            onFinish={this.createList}
+            onFinish={this.joinList}
           >
             <Form.Item
-              name="title"
-              label="Titel:"
+              name="inviteCode"
+              label="Uitnodigingscode:"
               rules={[
                 {
                   required: true,
-                  message: 'Vul hier een titel in',
+                  message: 'Vul hier de uitnodigingscode in',
                 },
               ]}
               style={{ margin: 0 }}

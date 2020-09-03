@@ -35,7 +35,6 @@ export default class GettingStartedButton extends Component<Props, State> {
         <Button
           type="default"
           icon={<QuestionCircleOutlined />}
-          loading={this.state.isShowingModal}
           onClick={this.showModal}
         >
           Hoe werkt het?
@@ -53,7 +52,8 @@ export default class GettingStartedButton extends Component<Props, State> {
         >
           <Title level={3}>Lijst toevoegen</Title>
           <Paragraph>
-            Klik op "Nieuwe lijst", vul een titel in voor de lijst en klik tot slot op "Aanmaken".
+            Klik op "Nieuwe lijst", vul een titel in voor de lijst en klik tot
+            slot op "Aanmaken".
           </Paragraph>
           <Paragraph style={{ textAlign: 'center' }}>
             <Image
@@ -98,9 +98,7 @@ export default class GettingStartedButton extends Component<Props, State> {
           <Divider />
 
           <Title level={3}>Labels</Title>
-          <Paragraph>
-            Je kunt labels naar keuze toevoegen.
-          </Paragraph>
+          <Paragraph>Je kunt labels naar keuze toevoegen.</Paragraph>
           <Paragraph style={{ textAlign: 'center' }}>
             <Image src="/tutorial/labels.gif" alt="Label tutorial GIF" />
           </Paragraph>
