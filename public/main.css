@@ -11,14 +11,10 @@
   resize: none;
 }
 
-/* Make clickable area big enough for item labels select box */
-.list-item .ant-select-selection-search {
-  min-width: 1em;
-}
-
 /* Make "Labels" fully clickable in list item */
+/* and ensure item with "Groente & Fruit" title stays on one line (HACK) */
 .list-item .ant-select {
-  min-width: 3.8em;
+  min-width: 10.2em;
 }
 
 /* Make dropdown for item labels is wide enough */
