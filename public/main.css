@@ -1,14 +1,24 @@
-/* Make clickable area big enough for item labels select box */
-.ant-list-item .ant-select-selection-search {
-  min-width: 1em;
-}
-
-/* Make top buttons are respsonsive */
+/* Make top buttons responsive */
 .ant-typography div {
   display: inline-block;
 }
 .ant-typography div.ant-space-item {
   margin-bottom: 8px;
+}
+
+/* Hide drag area on textarea of list item title */
+.list-item textarea.ant-input {
+  resize: none;
+}
+
+/* Make clickable area big enough for item labels select box */
+.list-item .ant-select-selection-search {
+  min-width: 1em;
+}
+
+/* Make "Labels" fully clickable in list item */
+.list-item .ant-select {
+  min-width: 3.8em;
 }
 
 /* Make dropdown for item labels is wide enough */

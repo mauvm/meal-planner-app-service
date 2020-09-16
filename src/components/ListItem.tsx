@@ -73,6 +73,21 @@ export default class ListItemComponent extends Component<Props, State> {
     }
   }
 
+  @autobind
+  renderTag(props: CustomTagProps) {
+    const { label, value, closable, onClose } = props
+
+    return (
+      <Tag
+        color={getLabelColor(String(value))}
+        closable={closable}
+        onClose={onClose}
+      >
+        {label}
+      </Tag>
+    )
+  }
+
   render() {
     const item = this.props.item
     const isUpdating = this.props.isUpdating
@@ -80,7 +95,7 @@ export default class ListItemComponent extends Component<Props, State> {
     const labels = this.getLabels()
 
     return (
-      <List.Item key={item.id}>
+      <List.Item className="list-item" key={item.id}>
         <div
           style={{
             width: '100%',
@@ -102,7 +117,7 @@ export default class ListItemComponent extends Component<Props, State> {
               }}
             />
           </div>
-          <div style={{ flex: '1 1 auto' }}>
+          <div style={{ flex: '3 1 auto' }}>
             <Input.TextArea
               value={title}
               disabled={isUpdating}
@@ -112,10 +127,13 @@ export default class ListItemComponent extends Component<Props, State> {
               style={{ border: 'none', boxShadow: 'none' }}
             />
           </div>
-          <div style={{ flex: '0 1 auto' }}>
+          <div style={{ flex: '1 1 auto', textAlign: 'right' }}>
             {/* Fix for notification messages suddenly being RTL as well */}
             <ConfigProvider direction="ltr">
-              <ConfigProvider direction="rtl" renderEmpty={() => 'Geen items..'}>
+              <ConfigProvider
+                direction="rtl"
+                renderEmpty={() => 'Geen items..'}
+              >
                 <Select
                   mode="tags"
                   tagRender={this.renderTag}
@@ -136,21 +154,6 @@ export default class ListItemComponent extends Component<Props, State> {
           </div>
         </div>
       </List.Item>
-    )
-  }
-
-  @autobind
-  renderTag(props: CustomTagProps) {
-    const { label, value, closable, onClose } = props
-
-    return (
-      <Tag
-        color={getLabelColor(String(value))}
-        closable={closable}
-        onClose={onClose}
-      >
-        {label}
-      </Tag>
     )
   }
 }
