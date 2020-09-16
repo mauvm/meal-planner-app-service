@@ -103,11 +103,12 @@ export default class ListItemComponent extends Component<Props, State> {
             />
           </div>
           <div style={{ flex: '1 1 auto' }}>
-            <Input
+            <Input.TextArea
               value={title}
               disabled={isUpdating}
               onChange={this.handleTitleChange}
               placeholder="Geen omschrijving"
+              autoSize
               style={{ border: 'none', boxShadow: 'none' }}
             />
           </div>
